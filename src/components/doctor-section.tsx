@@ -16,7 +16,7 @@ const LEFT: Item[] = [
 const RIGHT: Item[] = [
   {
     image: "/image/emergency.png",
-    title: "Layanan Gawat Darurat Ringan",
+    title: "Layanan Gawat Darurat",
     desc: "Siap membantu Anda dengan penanganan cepat dan tepat untuk kondisi darurat ringan.",
   },
   {

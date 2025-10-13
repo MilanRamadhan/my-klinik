@@ -3,6 +3,8 @@ import Link from "next/link";
 import Services from "@/components/services";
 import BpjsBanner from "@/components/bpjs-banner";
 import DoctorSection from "@/components/doctor-section";
+import ContactSection from "@/components/contact-section";
+import Footer from "@/components/footer";
 import { InfiniteMovingCards } from "../components/ui/infinite-moving-cards";
 import { testimonials } from "../components/testimonials";
 
@@ -76,11 +78,22 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* SECTION DOKTER: grid 3 kolom dengan gambar dokter di tengah */}
       <section className="">
         <div className="mx-auto max-w-7xl px-4">
           <DoctorSection />
         </div>
       </section>
+
+      {/* Contact */}
+      <section className="">
+        <div className="mx-auto max-w-7xl px-4">
+          <ContactSection />
+        </div>
+      </section>
+
+      <Footer />
     </main>
   );
 }
