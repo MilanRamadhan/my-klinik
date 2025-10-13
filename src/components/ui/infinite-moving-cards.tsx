@@ -11,9 +11,10 @@ export const InfiniteMovingCards = ({
   className,
 }: {
   items: {
-    quote: string;
+    avatar?: string;
     name: string;
     title: string;
+    quote: string;
   }[];
   direction?: "left" | "right";
   speed?: "fast" | "normal" | "slow";
@@ -77,14 +78,23 @@ export const InfiniteMovingCards = ({
                        bg-[linear-gradient(180deg,#fafafa,#f5f5f5)] px-8 py-6 md:w-[450px]
                        dark:border-zinc-700 dark:bg-[linear-gradient(180deg,#27272a,#18181b)]"
           >
-            <blockquote>
-              <span className="relative z-20 text-sm leading-[1.6] text-neutral-800 dark:text-gray-100">“{item.quote}”</span>
-              <div className="relative z-20 mt-6 flex flex-row items-center">
-                <span className="flex flex-col gap-1">
-                  <span className="text-sm leading-[1.6] text-neutral-500 dark:text-gray-400">{item.name}</span>
-                  <span className="text-sm leading-[1.6] text-neutral-500 dark:text-gray-400">{item.title}</span>
-                </span>
+            <blockquote className="flex flex-col items-start">
+              <div className="mb-5 flex items-center gap-3">
+                <img
+                  src={item.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}`}
+                  alt={item.name}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-full object-cover border border-zinc-300 dark:border-zinc-700"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="leading-tight">
+                  <div className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">{item.name}</div>
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400">{item.title}</div>
+                </div>
               </div>
+              <p className="text-sm leading-[1.6] text-neutral-800 dark:text-gray-100">“{item.quote}”</p>
             </blockquote>
           </li>
         ))}

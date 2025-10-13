@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import Services from "../components/services";
-import BpjsBanner from "../components/bpjs-banner";
+import Services from "@/components/services";
+import BpjsBanner from "@/components/bpjs-banner";
+import DoctorSection from "@/components/doctor-section";
 import { InfiniteMovingCards } from "../components/ui/infinite-moving-cards";
 import { testimonials } from "../components/testimonials";
 
@@ -40,7 +41,7 @@ export default function Home() {
 
       {/* SECTION PELAYANAN: hanya grid card, tidak ada card pembungkus section */}
       <section className="pt-10">
-        <div className="mx-auto max-w-7xl px-4 py-12">
+        <div className="mx-auto max-w-7xl px-4 py-12 pb-0">
           <h2 className="text-center text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Pelayanan Klinik</h2>
           <Services /> {/* grid 4 card link: Call, Schedule, Consultation, Write Review */}
         </div>
@@ -48,7 +49,7 @@ export default function Home() {
 
       {/* Banner BPJS tipis, bukan card besar halaman */}
       <section className="">
-        <div className="mx-auto max-w-7xl px-4">
+        <div className="mx-auto max-w-7xl px-4 pt-0">
           <BpjsBanner />
         </div>
       </section>
@@ -62,7 +63,7 @@ export default function Home() {
 
           <div
             id="testimonials"
-            className="mt-10  rounded-2xl border border-black/5 bg-white/40
+            className="mt-2 rounded-2xl bg-white/40
                        backdrop-blur-sm relative overflow-hidden"
           >
             <InfiniteMovingCards
@@ -73,6 +74,11 @@ export default function Home() {
               className="p-4"
             />
           </div>
+        </div>
+      </section>
+      <section className="">
+        <div className="mx-auto max-w-7xl px-4">
+          <DoctorSection />
         </div>
       </section>
     </main>
