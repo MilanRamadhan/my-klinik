@@ -17,7 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 bg-white backdrop-blur border-b">
+    <header className="sticky top-0 bg-white backdrop-blur border-b z-50">
       <div className="pl-5 pr-20 py-2 flex items-center justify-between">
         <Link href="/" className="flex relative items-start gap-2">
           <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority />
