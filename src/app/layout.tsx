@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className={`${jakarta.variable} bg-gradient-to-b from-white to-[#eaf4ff]`}>
+      <body className={`${jakarta.variable} bg-white`}>
         <Navbar />
         {children}
       </body>
