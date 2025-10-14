@@ -131,3 +131,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+/* tinggi navbar kamu, misal 72px */
+[id] {
+  scroll-margin-top: 20px;
+}

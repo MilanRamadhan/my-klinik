@@ -11,7 +11,7 @@ import { testimonials } from "../components/testimonials";
 export default function Home() {
   return (
     <main className="w-full min-h-screen pb-10 flex flex-col items-center justify-center bg-white">
-      <section className=" grid grid-cols-1 md:grid-cols-2 items-center pl-30 pb-15 pt-10">
+      <section id="home" className=" grid grid-cols-1 md:grid-cols-2 items-center pl-30 pb-15 pt-10">
         {/* Copy kiri */}
         <div>
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">
@@ -42,7 +42,7 @@ export default function Home() {
       </section>
 
       {/* SECTION PELAYANAN: hanya grid card, tidak ada card pembungkus section */}
-      <section className="pt-10">
+      <section id="service" className="pt-10">
         <div className="mx-auto max-w-7xl px-4 py-12 pb-0">
           <h2 className="text-center text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Pelayanan Klinik</h2>
           <Services /> {/* grid 4 card link: Call, Schedule, Consultation, Write Review */}
@@ -80,14 +80,14 @@ export default function Home() {
       </section>
 
       {/* SECTION DOKTER: grid 3 kolom dengan gambar dokter di tengah */}
-      <section className="">
+      <section id="doctors" className="">
         <div className="mx-auto max-w-7xl px-4">
           <DoctorSection />
         </div>
       </section>
 
       {/* Contact */}
-      <section className="">
+      <section id="about" className="">
         <div className="mx-auto max-w-7xl px-4">
           <ContactSection />
         </div>
