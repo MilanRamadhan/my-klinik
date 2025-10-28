@@ -1,23 +1,31 @@
 // src/app/reviews/new/page.tsx
+"use client";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import ReviewForm from "@/components/review-form";
+import { useProtectedPage } from "@/hooks/useProtectedPage";
+import { useAuth } from "@/components/auth-provider";
 
-async function submitReview(formData: FormData) {
-  "use server";
-  const name = String(formData.get("name") || "");
-  const message = String(formData.get("message") || "");
-  const rating = Number(formData.get("rating") || 5);
+export default function NewReviewPage() {
+  // Proteksi halaman - redirect ke login jika belum login
+  useProtectedPage();
 
-  // TODO: simpan ke DB di sini (Prisma/Supabase/dll)
-  console.log("New review:", { name, message, rating, date: new Date().toISOString() });
+  const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSubmitted = searchParams.get("submitted") === "1";
 
-  redirect("/reviews/new?submitted=1");
-}
+  async function submitReview(formData: FormData) {
+    const name = String(formData.get("name") || "");
+    const message = String(formData.get("message") || "");
+    const rating = Number(formData.get("rating") || 5);
 
-export default function NewReviewPage({ searchParams }: { searchParams?: { submitted?: string } }) {
-  const isSubmitted = searchParams?.submitted === "1";
+    // TODO: simpan ke Supabase di sini
+    console.log("New review:", { name, message, rating, date: new Date().toISOString(), user_id: user?.id });
+
+    router.push("/reviews/new?submitted=1");
+  }
 
   return (
     <div className="mx-auto max-w-5xl p-6 md:p-10">
