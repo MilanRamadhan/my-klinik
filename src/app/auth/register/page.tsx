@@ -66,7 +66,7 @@ export default function RegisterPage() {
         </button>
         <p className="text-sm text-gray-600 text-center">
           Sudah punya akun?{" "}
-          <Link href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold underline text-blue-600 hover:text-blue-800">
+          <Link href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold hover:text-blue-500 hover:underline">
             Masuk
           </Link>
         </p>

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Halaman yang memerlukan autentikasi
-const protectedRoutes = ["/appointment", "/schedule", "/consultation", "/chat", "/reviews/new"];
+const protectedRoutes = ["/appointment", "/schedule", "/chat", "/chat", "/reviews/new"];
 
 // Halaman auth yang tidak boleh diakses jika sudah login
 const authRoutes = ["/auth/login", "/auth/register"];

@@ -1,4 +1,6 @@
-// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider  = "postgresql"
@@ -6,22 +8,49 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String   @unique
+  email         String    @unique
   password      String
   image         String?
+  phone         String?   @db.VarChar(32)
+  bpjsNumber    String?   @db.VarChar(32)
   emailVerified DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts Account[]
+  sessions Session[]
+
+  // >>> Tambahan untuk fitur chat
+  rooms        ChatRoom[]    @relation("UserRooms")
+  memberships  ChatMember[]  @relation("UserMemberships")
+  messagesSent Message[]     @relation("UserMessages")
+  Reservation  Reservation[]
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Reservation {
+  id          String            @id @default(cuid())
+  userId      String
+  scheduledAt DateTime
+  durationMin Int               @default(30)
+  doctor      String?
+  note        String?
+  status      ReservationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  cancelledAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduledAt, doctor]) // 1 dokter = 1 slot
+  @@index([userId, scheduledAt])
 }
 
 model Account {
@@ -30,16 +59,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -49,7 +76,6 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -59,4 +85,44 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  createdAt DateTime @default(now())
+
+  user     User         @relation("UserRooms", fields: [userId], references: [id], onDelete: Cascade)
+  members  ChatMember[]
+  messages Message[]
+
+  @@index([userId])
+}
+
+model ChatMember {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  role     String   @default("user")
+  joinedAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation("UserMemberships", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  roomId    String
+  senderId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
 }

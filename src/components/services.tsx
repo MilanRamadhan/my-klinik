@@ -10,7 +10,7 @@ type Item = {
 const items: Item[] = [
   { title: "Call for Appointment", icon: "📞", href: "/appointment", desc: "Telepon klinik untuk booking cepat tanpa antre." },
   { title: "Get a Date & Serial", icon: "🗓️", href: "/schedule", desc: "Pilih tanggal kunjungan dan dapatkan nomor antrean." },
-  { title: "Consultation", icon: "💬", href: "/consultation", desc: "Konsultasi langsung dengan dokter berpengalaman." },
+  { title: "Consultation", icon: "💬", href: "/chat", desc: "Konsultasi langsung dengan dokter berpengalaman." },
   { title: "Write a Review", icon: "✍️", href: "/reviews/new", desc: "Bagikan pengalamanmu agar bantu pasien lain." },
 ];
 

@@ -19,11 +19,13 @@ export default function LoginPage() {
     setError("");
 
     try {
+      const targetCb = email === "admin@gmail.com" ? "/admin" : callbackUrl;
+
       const res = await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: targetCb,
       });
 
       setLoading(false);
@@ -33,8 +35,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Sukses - redirect ke callbackUrl
-      window.location.href = callbackUrl;
+      // Sukses - redirect ke target callback (admin or provided callback)
+      window.location.href = (res?.url as string) || targetCb;
     } catch (err: any) {
       setError(err.message || "Email atau password salah");
       setLoading(false);
@@ -59,7 +61,7 @@ export default function LoginPage() {
         </button>
         <p className="text-sm text-gray-600 text-center">
           Belum punya akun?{" "}
-          <Link href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold underline text-blue-600 hover:text-blue-800">
+          <Link href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-semibold hover:text-blue-500 hover:underline">
             Daftar
           </Link>
         </p>

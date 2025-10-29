@@ -1,76 +1,174 @@
-// src/app/chat/page.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useProtectedPage } from "@/hooks/useProtectedPage";
-import { useAuth } from "@/components/auth-provider";
+import Image from "next/image";
+import { Send } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { roomChannel } from "@/lib/supabase";
 
-type Msg = { id: string; room_id: string; username: string; text: string; created_at: string };
+type Msg = { id?: string; body: string; senderId: string; createdAt: string };
 
-export default function ChatPage() {
-  // Proteksi halaman - redirect ke login jika belum login
-  useProtectedPage();
-
-  const { user } = useAuth();
-  const roomId = "general";
-  const [text, setText] = useState("");
-  const [msgs, setMsgs] = useState<Msg[]>([]);
-  const endRef = useRef<HTMLDivElement>(null);
+export default function ConsultationPage() {
+  const { data: session } = useSession();
+  const myId = (session?.user as any)?.id ?? ""; // pastikan callbacks NextAuth sudah inject id
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [input, setInput] = useState("");
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<typeof roomChannel> | null>(null);
 
   useEffect(() => {
-    let ch: ReturnType<typeof supabase.channel> | null = null;
     (async () => {
-      const { data } = await supabase.from("messages").select("*").eq("room_id", roomId).order("created_at", { ascending: true }).limit(200);
-      setMsgs(data ?? []);
-      ch = supabase
-        .channel("realtime:messages")
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${roomId}` }, (payload) => {
-          setMsgs((p) => [...p, payload.new as Msg]);
-          endRef.current?.scrollIntoView({ behavior: "smooth" });
-        })
-        .subscribe();
+      const r = await fetch("/api/chat/room", { method: "POST" });
+      if (!r.ok) return;
+      const { id } = await r.json();
+      setRoomId(id);
     })();
-    return () => {
-      if (ch) supabase.removeChannel(ch);
-    };
   }, []);
 
-  async function send(e: React.FormEvent) {
-    e.preventDefault();
-    const t = text.trim();
-    if (!t || !user) return;
+  useEffect(() => {
+    if (!roomId) return;
+    let unsub = () => {};
+    (async () => {
+      const r = await fetch(`/api/chat/messages/${roomId}`);
+      if (!r.ok) {
+        console.error("Failed to fetch messages:", r.status);
+        return;
+      }
+      const data = await r.json();
+      const rows: Msg[] = data.messages || data || [];
+      setMessages(rows);
+      scrollBottom();
 
-    const username = user.name || user.email || "User";
-    await supabase.from("messages").insert({ room_id: roomId, username, text: t });
-    setText("");
+      const ch = roomChannel(roomId);
+      ch.on("broadcast", { event: "new_message" }, (payload: any) => {
+        // pastikan payload punya createdAt valid
+        const createdAt = toIso(payload?.createdAt);
+        setMessages((m) => [...m, { ...payload, createdAt }]);
+        scrollBottom();
+      });
+      ch.subscribe();
+      channelRef.current = ch;
+      unsub = () => ch.unsubscribe();
+    })();
+    return () => unsub();
+  }, [roomId]);
+
+  function scrollBottom() {
+    const el = scrollerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  async function send() {
+    const body = input.trim();
+    if (!body || !roomId) return;
+
+    // Optimistic add (supaya terasa responsif)
+    const optimistic: Msg = {
+      id: undefined,
+      body,
+      senderId: myId,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((m) => [...m, optimistic]);
+    scrollBottom();
+    setInput("");
+
+    // Simpan ke server
+    const r = await fetch(`/api/chat/messages/${roomId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body }),
+    });
+    if (!r.ok) {
+      console.error("Failed to send message:", r.status);
+      return;
+    }
+
+    // Dapatkan data "resmi" dari server (punya id) lalu broadcast
+    const data = await r.json();
+    const saved: Msg = data.message || data;
+    const payload: Msg = {
+      id: saved.id,
+      body: saved.body,
+      senderId: saved.senderId ?? myId,
+      createdAt: toIso(saved.createdAt),
+    };
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "new_message",
+      payload,
+    });
+
+    // Ganti entry optimistik tanpa id dengan versi punya id (opsional)
+    setMessages((m) => {
+      const lastIdx = m.findIndex((x) => x === optimistic);
+      if (lastIdx === -1) return m;
+      const copy = [...m];
+      copy[lastIdx] = payload;
+      return copy;
+    });
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-4">
-      <h1 className="mb-4 text-2xl font-bold">Chat Realtime</h1>
-      <div className="mb-3 flex gap-2">
-        <div className="text-sm text-gray-600">
-          Logged in as: <span className="font-semibold">{user?.name || user?.email}</span>
+    <main className="mx-auto max-w-5xl px-4 py-6">
+      <section className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_24px_rgba(0,0,0,0.06)]">
+        <div className="px-6 pt-6 pb-3">
+          <h1 className="text-center text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Konsultasi</h1>
         </div>
-        <div className="ml-auto text-xs text-gray-500">Room: {roomId}</div>
-      </div>
-      <div className="h-[60vh] overflow-y-auto rounded-2xl border border-black/10 bg-white p-4">
-        {msgs.length === 0 && <div className="text-center text-gray-500 mt-10">Belum ada pesan. Mulai chat sekarang!</div>}
-        {msgs.map((m) => (
-          <div key={m.id} className="mb-3">
-            <div className="text-xs text-gray-500">
-              {m.username} • {new Date(m.created_at).toLocaleTimeString()}
-            </div>
-            <div className="inline-block rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-800">{m.text}</div>
+        <hr className="mx-6 border-gray-200" />
+
+        <div ref={scrollerRef} className="px-6 py-5 h-[62vh] md:h-[68vh] overflow-y-auto">
+          {messages.length === 0 && <ChatRow side="left" avatar="/image/dokter.png" bubble="Halo, ada yang bisa kami bantu?" />}
+
+          {messages.map((m, idx) => {
+            const mine = m.senderId === myId;
+            const key = m.id ?? `${m.createdAt}-${idx}`; // FIX: key selalu unik
+            const time = safeTime(m.createdAt);
+            return <ChatRow key={key} side={mine ? "right" : "left"} avatar={mine ? undefined : "/image/dokter.png"} bubble={m.body} time={time} />;
+          })}
+        </div>
+
+        <div className="px-6 pb-6">
+          <div className="rounded-full bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] ring-1 ring-black/5 flex items-center gap-2 p-2">
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Ketik pesan Anda di sini…" className="flex-1 rounded-full px-4 py-3 outline-none" />
+            <button onClick={send} className="grid h-11 w-11 place-items-center rounded-full bg-[#7aa6d8] hover:brightness-95 transition" aria-label="Kirim">
+              <Send className="h-5 w-5 text-white" />
+            </button>
           </div>
-        ))}
-        <div ref={endRef} />
-      </div>
-      <form onSubmit={send} className="mt-3 flex gap-2">
-        <input className="flex-1 rounded-xl border px-3 py-2" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ketik pesan..." maxLength={1000} />
-        <button className="rounded-xl bg-gray-900 px-4 py-2 font-semibold text-white hover:opacity-90">Kirim</button>
-      </form>
+        </div>
+      </section>
     </main>
   );
+}
+
+function ChatRow({ side, avatar, bubble, time }: { side: "left" | "right"; avatar?: string; bubble: string; time?: string }) {
+  const isLeft = side === "left";
+  return (
+    <div className={`mb-4 flex items-end gap-3 ${isLeft ? "" : "justify-end"}`}>
+      {isLeft && (
+        <div className="relative h-8 w-8">
+          <Image src={avatar ?? "/image/dokter.png"} alt="admin" fill className="rounded-full object-contain" />
+        </div>
+      )}
+      <div className={["max-w-[75%] rounded-2xl px-4 py-2 text-sm", isLeft ? "bg-[#d9ecff]" : "bg-gray-100"].join(" ")}>
+        <div className="text-gray-900">{bubble}</div>
+        {time && <div className="mt-1 text-[10px] text-gray-500">{time}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* Utils defensif */
+function toIso(x: any) {
+  try {
+    const d = new Date(x ?? Date.now());
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+}
+function safeTime(x: string) {
+  const d = new Date(x);
+  return isNaN(d.getTime()) ? "" : d.toLocaleTimeString();
 }

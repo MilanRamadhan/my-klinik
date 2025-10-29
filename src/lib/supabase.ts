@@ -21,3 +21,12 @@ export const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,
     autoRefreshToken: false,
   },
 });
+
+// helper bikin nama channel
+export const roomChannel = (roomId: string) =>
+  supabase.channel(`chat:${roomId}`, {
+    config: {
+      broadcast: { self: true },
+      presence: { key: crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) },
+    },
+  });
