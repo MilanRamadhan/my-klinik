@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import ReviewForm from "@/components/review-form";
 import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { useAuth } from "@/components/auth-provider";
+import { useState } from "react";
 
 export default function NewReviewPage() {
   // Proteksi halaman - redirect ke login jika belum login
@@ -15,16 +16,33 @@ export default function NewReviewPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSubmitted = searchParams.get("submitted") === "1";
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function submitReview(formData: FormData) {
     const name = String(formData.get("name") || "");
     const message = String(formData.get("message") || "");
     const rating = Number(formData.get("rating") || 5);
 
-    // TODO: simpan ke Supabase di sini
-    console.log("New review:", { name, message, rating, date: new Date().toISOString(), user_id: user?.id });
+    setIsSubmitting(true);
 
-    router.push("/reviews/new?submitted=1");
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, message, rating }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit review");
+      }
+
+      router.push("/reviews/new?submitted=1");
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Gagal mengirim review. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

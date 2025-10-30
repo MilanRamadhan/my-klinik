@@ -28,6 +28,7 @@ model User {
   memberships  ChatMember[]  @relation("UserMemberships")
   messagesSent Message[]     @relation("UserMessages")
   Reservation  Reservation[]
+  reviews      Review[]      @relation("UserReviews")
 }
 
 enum ReservationStatus {
@@ -125,4 +126,18 @@ model Message {
   sender User     @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([roomId, createdAt])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  message   String   @db.Text
+  rating    Int      @default(5)
+  createdAt DateTime @default(now())
+
+  user User @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
 }

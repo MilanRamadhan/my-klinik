@@ -49,6 +49,14 @@ export default function SchedulePage() {
 
   const [slots, setSlots] = useState<{ time: string; available: boolean }[]>([]);
   const [myUpcoming, setMyUpcoming] = useState<{ id: string; scheduledAt: string } | null>(null);
+  const [myReservations, setMyReservations] = useState<
+    Array<{
+      id: string;
+      scheduledAt: string;
+      status: string;
+      doctor: string | null;
+    }>
+  >([]);
 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -101,12 +109,15 @@ export default function SchedulePage() {
       const r = await fetch("/api/schedule/my", { cache: "no-store" });
       if (!r.ok) {
         setMyUpcoming(null);
+        setMyReservations([]);
         return;
       }
       const rows = await r.json();
       setMyUpcoming(rows?.[0] ?? null);
+      setMyReservations(rows || []);
     } catch {
       setMyUpcoming(null);
+      setMyReservations([]);
     }
   }
   useEffect(() => {
@@ -278,6 +289,43 @@ export default function SchedulePage() {
           )}
         </div>
       </div>
+
+      {/* Daftar Reservasi Saya */}
+      {myReservations.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-lg font-extrabold text-gray-900 mb-4">Riwayat Reservasi Anda</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myReservations.map((reservation) => {
+              const schedDate = new Date(reservation.scheduledAt);
+              const statusColors = {
+                PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+                CONFIRMED: "bg-green-100 text-green-800 border-green-300",
+                CANCELLED: "bg-red-100 text-red-800 border-red-300",
+              };
+              const statusText = {
+                PENDING: "Menunggu Konfirmasi",
+                CONFIRMED: "Dikonfirmasi",
+                CANCELLED: "Dibatalkan",
+              };
+              return (
+                <div key={reservation.id} className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_0_rgba(0,0,0,0.06)] p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{fmtDateHuman(schedDate)}</p>
+                      <p className="text-xs text-gray-500">{schedDate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full border font-medium ${statusColors[reservation.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}>
+                      {statusText[reservation.status as keyof typeof statusText] || reservation.status}
+                    </span>
+                  </div>
+                  {reservation.doctor && <p className="text-xs text-gray-600">Dokter: {reservation.doctor}</p>}
+                  {reservation.status === "PENDING" && <p className="text-xs text-gray-500 mt-2 italic">Mohon menunggu konfirmasi dari admin</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

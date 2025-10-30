@@ -13,7 +13,7 @@ const CONTACTS: ContactInfo[] = [
   {
     title: "Visit Us",
     desc: "Jl. PTPN I, Kb. Baru, Kec. Langsa Baro, Kota Langsa, Aceh 24416",
-    href: "https://maps.google.com/?q=Jl. PTPN I, Kb. Baru, Langsa",
+    href: "https://maps.app.goo.gl/hrKKgxpdNiqAFqGz5", // BERSIHKAN URL
     display: "Buka di Maps",
     icon: <MapPin className="h-8 w-8 text-[#7aa6d8]" />,
   },
@@ -64,7 +64,7 @@ export default function ContactSection() {
                       href={c.href}
                       className="mt-4 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
                       target={c.href.startsWith("http") ? "_blank" : undefined}
-                      rel={c.href.startsWith("http") ? "noreferrer" : undefined}
+                      rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined} // tambahkan noopener
                     >
                       {c.display ?? c.href}
                     </Link>

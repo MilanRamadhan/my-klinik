@@ -86,7 +86,7 @@ export default function Footer() {
               <li>Senin–Jumat: 16.00–21.00</li>
               <li>Sabtu-Minggu: Tutup</li>
             </ul>
-            <Link href="/appointment" className="mt-5 inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+            <Link href="/schedule" className="mt-5 inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
               Buat Janji
             </Link>
           </div>
