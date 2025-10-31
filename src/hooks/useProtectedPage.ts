@@ -2,7 +2,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isLoggedIn } from "@/lib/auth";
+import { useSession } from "next-auth/react";
 
 /**
  * Hook untuk melindungi halaman yang memerlukan autentikasi
@@ -16,11 +16,13 @@ import { isLoggedIn } from "@/lib/auth";
  */
 export function useProtectedPage() {
   const router = useRouter();
+  const { status } = useSession();
 
   useEffect(() => {
-    if (!isLoggedIn()) {
+    if (status === "unauthenticated") {
       // Redirect ke login jika belum login
-      router.push("/auth/login");
+      const currentPath = window.location.pathname;
+      router.push(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
     }
-  }, [router]);
+  }, [status, router]);
 }

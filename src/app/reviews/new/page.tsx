@@ -2,7 +2,6 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import ReviewForm from "@/components/review-form";
 import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { useAuth } from "@/components/auth-provider";
@@ -48,11 +47,13 @@ export default function NewReviewPage() {
   return (
     <div className="mx-auto max-w-5xl p-6 md:p-10">
       {/* NAVIGASI BALIK */}
-      <Link href="/#service" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900" scroll={false}>
-        <ArrowLeft className="h-4 w-4" />
-        Kembali
-      </Link>
-      <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">Tulis Ulasan</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Tulis Ulasan</h1>
+        <Link href="/#service" className="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-black/10 hover:ring-black/20">
+          Kembali
+        </Link>
+      </div>
+
       <p className="mt-2 text-gray-600">Pengalamanmu bantu pasien lain mengambil keputusan. Tulis singkat, jelas, dan jujur.</p>
 
       {isSubmitted && <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">Terima kasih! Ulasanmu sudah diterima.</div>}

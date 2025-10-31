@@ -5,8 +5,7 @@ import BpjsBanner from "@/components/bpjs-banner";
 import DoctorSection from "@/components/doctor-section";
 import ContactSection from "@/components/contact-section";
 import Footer from "@/components/footer";
-import { InfiniteMovingCards } from "../components/ui/infinite-moving-cards";
-import { testimonials } from "../components/testimonials";
+import Testimonials from "@/components/testimonials";
 
 export default function Home() {
   return (
@@ -19,7 +18,7 @@ export default function Home() {
             <br /> untuk Keluarga Anda
           </h1>
 
-          <p className="mt-5 text-gray-600 max-w-xl">Dapatkan layanan kesehatan terbaik dari dr. Alexander, M.K.M. Beliau siap melayani kebutuhan kesehatan Anda dan seluruh keluarga dengan keahlian dan pengalaman.</p>
+          <p className="mt-5 text-gray-600 max-w-xl">Dapatkan layanan kesehatan terbaik dari dr. Donny Mulizar, M.K.M. Beliau siap melayani kebutuhan kesehatan Anda dan seluruh keluarga dengan keahlian dan pengalaman.</p>
 
           <div className="mt-8 flex items-center gap-4">
             <Link
@@ -50,32 +49,16 @@ export default function Home() {
       </section>
 
       {/* Banner BPJS tipis, bukan card besar halaman */}
-      <section className="">
-        <div className="mx-auto max-w-7xl px-4 pt-0">
+      <section>
+        <div className="mx-auto max-w-7xl px-4 ">
           <BpjsBanner />
         </div>
       </section>
 
       {/* Testimonials: grid card kecil-kecil */}
       <section>
-        <div>
-          <h2 className="text-center text-3xl md:text-4xl font-extrabold text-gray-900">
-            What <span className="text-[#7aa6d8] drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Clients</span> Say!
-          </h2>
-
-          <div
-            id="testimonials"
-            className="mt-2 rounded-2xl bg-white/40
-                       backdrop-blur-sm relative overflow-hidden"
-          >
-            <InfiniteMovingCards
-              items={testimonials}
-              direction="left" // "left" | "right"
-              speed="fast" // "slow" | "normal" | "fast"
-              pauseOnHover={true} // opsional; default true
-              className="p-4"
-            />
-          </div>
+        <div className="mx-auto max-w-7xl px-4 py-12 pt-0">
+          <Testimonials />
         </div>
       </section>
 

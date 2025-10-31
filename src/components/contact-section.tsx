@@ -20,7 +20,7 @@ const CONTACTS: ContactInfo[] = [
   {
     title: "Call Us",
     desc: "Kami siap bantu di jam kerja.",
-    href: "tel:+6285262427888",
+    href: "https://wa.me/6285262427888?text=Halo,%20saya%20ingin%20menghubungi%20klinik",
     display: "+62 852 6242 7888",
     icon: <Phone className="h-8 w-8 text-[#7aa6d8]" />,
   },

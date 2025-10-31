@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 
 type Review = {
   id: string;
@@ -28,6 +29,13 @@ export default function Testimonials() {
       });
   }, []);
 
+  // Convert reviews to testimonials format for InfiniteMovingCards
+  const testimonials = reviews.map((review) => ({
+    quote: review.message,
+    name: review.name,
+    title: "Pasien",
+  }));
+
   return (
     <>
       <h2 className="text-center text-3xl md:text-4xl font-extrabold text-gray-900">
@@ -39,16 +47,12 @@ export default function Testimonials() {
       ) : reviews.length === 0 ? (
         <div className="mt-8 text-center text-gray-500">Belum ada ulasan. Jadilah yang pertama!</div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {reviews.slice(0, 4).map((review) => (
-            <article key={review.id} className="rounded-2xl bg-white p-5 shadow-[0_6px_0_rgba(0,0,0,0.15)] ring-1 ring-black/5">
-              <div className="flex items-center gap-3">
-                <img src={review.user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}`} alt={review.name} className="h-9 w-9 rounded-full object-cover" />
-                <div className="font-semibold text-gray-900">{review.name}</div>
-              </div>
-              <p className="mt-3 text-gray-600 line-clamp-3">{review.message}</p>
-            </article>
-          ))}
+        <div
+          id="testimonials"
+          className="mt-2 rounded-2xl bg-white/40
+                     backdrop-blur-sm relative overflow-hidden"
+        >
+          <InfiniteMovingCards items={testimonials} direction="left" speed="fast" pauseOnHover={true} className="p-4" />
         </div>
       )}
     </>

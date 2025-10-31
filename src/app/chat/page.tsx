@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Send } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { roomChannel } from "@/lib/supabase";
@@ -42,6 +43,9 @@ export default function ConsultationPage() {
 
       const ch = roomChannel(roomId);
       ch.on("broadcast", { event: "new_message" }, (payload: any) => {
+        // Skip jika payload kosong atau body kosong
+        if (!payload || !payload.body || payload.body.trim() === "") return;
+
         // pastikan payload punya createdAt valid
         const createdAt = toIso(payload?.createdAt);
         setMessages((m) => [...m, { ...payload, createdAt }]);
@@ -82,12 +86,22 @@ export default function ConsultationPage() {
     });
     if (!r.ok) {
       console.error("Failed to send message:", r.status);
+      // Remove optimistic message if failed
+      setMessages((m) => m.filter((msg) => msg !== optimistic));
       return;
     }
 
     // Dapatkan data "resmi" dari server (punya id) lalu broadcast
     const data = await r.json();
     const saved: Msg = data.message || data;
+
+    // Validasi message yang disimpan
+    if (!saved || !saved.body || saved.body.trim() === "") {
+      console.error("Invalid message received from server");
+      setMessages((m) => m.filter((msg) => msg !== optimistic));
+      return;
+    }
+
     const payload: Msg = {
       id: saved.id,
       body: saved.body,
@@ -112,16 +126,27 @@ export default function ConsultationPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
+      {/* Header dengan tombol Kembali */}
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Konsultasi</h1>
+        <Link href="/#service" className="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-black/10 hover:ring-black/20">
+          Kembali
+        </Link>
+      </div>
+
       <section className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_24px_rgba(0,0,0,0.06)]">
-        <div className="px-6 pt-6 pb-3">
-          <h1 className="text-center text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Konsultasi</h1>
+        <div className="px-6 pt-4 pb-3">
+          <p className="text-center text-sm text-gray-600">Chat dengan dokter kami</p>
         </div>
         <hr className="mx-6 border-gray-200" />
 
-        <div ref={scrollerRef} className="px-6 py-5 h-[62vh] md:h-[68vh] overflow-y-auto">
+        <div ref={scrollerRef} className="px-6 py-5 h-[calc(100vh-320px)] min-h-[400px] max-h-[600px] overflow-y-auto">
           {messages.length === 0 && <ChatRow side="left" avatar="/image/dokter.png" bubble="Halo, ada yang bisa kami bantu?" />}
 
           {messages.map((m, idx) => {
+            // Skip jika body kosong
+            if (!m.body || m.body.trim() === "") return null;
+
             const mine = m.senderId === myId;
             const key = m.id ?? `${m.createdAt}-${idx}`; // FIX: key selalu unik
             const time = safeTime(m.createdAt);
