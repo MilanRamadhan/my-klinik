@@ -13,7 +13,7 @@ export default function Home() {
       <section id="home" className=" grid grid-cols-1 md:grid-cols-2 items-center pl-30 pb-15 pt-10">
         {/* Copy kiri */}
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">
+          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[3px_3px_1px_rgba(0,0,0,0.15)]">
             Layanan <span className="text-[#7aa6d8]">Kesehatan</span> Terpercaya
             <br /> untuk Keluarga Anda
           </h1>
