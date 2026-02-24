@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   if (!date || !time) return NextResponse.json({ error: "Tanggal/jam wajib" }, { status: 400 });
 
-  const scheduledAt = new Date(`${date}T${time}:00Z`);
+  const scheduledAt = new Date(`${date}T${time}:00+07:00`);
   if (Number.isNaN(scheduledAt.getTime())) return NextResponse.json({ error: "Tanggal/jam invalid" }, { status: 400 });
 
   // Cek tabrakan

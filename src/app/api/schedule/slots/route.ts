@@ -24,7 +24,13 @@ export async function GET(req: Request) {
   });
 
   const takenSet = new Set(
-    taken.map((r) => r.scheduledAt.toISOString().substring(11, 16)) // "HH:MM"
+    taken.map((r) =>
+      new Date(r.scheduledAt).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "UTC", // Pastikan membaca jam sama persis seperti di database
+      }),
+    ), // "HH:MM"
   );
 
   const slots = SLOT_TIMES.map((t) => ({ time: t, available: !takenSet.has(t) }));
