@@ -11,28 +11,43 @@ export async function GET(req: Request) {
   const doctor = url.searchParams.get("doctor") ?? "dr-alexander";
   if (!d) return NextResponse.json({ error: "date wajib" }, { status: 400 });
 
-  const dayStart = new Date(`${d}T00:00:00.000Z`);
-  const dayEnd = new Date(`${d}T23:59:59.999Z`);
+  // Query untuk hari tersebut dalam timezone lokal (GMT+0700)
+  const dayStart = new Date(`${d}T00:00:00+07:00`);
+  const dayEnd = new Date(`${d}T23:59:59+07:00`);
 
+  console.log(`[SLOTS API] Querying range: ${dayStart} to ${dayEnd}`);
+
+  // Hanya ambil reservasi yang sudah CONFIRMED atau PENDING (belum dibatalkan)
   const taken = await prisma.reservation.findMany({
     where: {
       doctor,
-      status: { not: "CANCELLED" as any },
+      status: { in: ["CONFIRMED", "PENDING"] },
       scheduledAt: { gte: dayStart, lte: dayEnd },
     },
-    select: { scheduledAt: true },
+    select: { scheduledAt: true, status: true },
   });
 
+  console.log(`[SLOTS API] Date: ${d}, Found ${taken.length} reservations`);
+
   const takenSet = new Set(
-    taken.map((r) =>
-      new Date(r.scheduledAt).toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "UTC", // Pastikan membaca jam sama persis seperti di database
-      }),
-    ), // "HH:MM"
+    taken.map((r) => {
+      const date = new Date(r.scheduledAt);
+      // Gunakan jam lokal (bukan UTC) karena data tersimpan dalam GMT+0700
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const timeStr = `${hours}:${minutes}`;
+      console.log(`[SLOTS API] Reservation: ${timeStr} (${r.status}) - Raw: ${r.scheduledAt}`);
+      return timeStr;
+    }),
   );
 
-  const slots = SLOT_TIMES.map((t) => ({ time: t, available: !takenSet.has(t) }));
+  const slots = SLOT_TIMES.map((t) => ({
+    time: t,
+    available: !takenSet.has(t),
+  }));
+
+  console.log(`[SLOTS API] Taken times:`, Array.from(takenSet));
+  console.log(`[SLOTS API] Slots result:`, slots);
+
   return NextResponse.json({ date: d, doctor, slots });
 }

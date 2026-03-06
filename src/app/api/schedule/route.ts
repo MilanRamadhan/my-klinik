@@ -19,15 +19,26 @@ export async function POST(req: Request) {
 
   if (!date || !time) return NextResponse.json({ error: "Tanggal/jam wajib" }, { status: 400 });
 
+  // Parse dengan timezone lokal (GMT+0700) untuk konsistensi dengan data existing
+  // Format: YYYY-MM-DDTHH:mm:ss+07:00
   const scheduledAt = new Date(`${date}T${time}:00+07:00`);
   if (Number.isNaN(scheduledAt.getTime())) return NextResponse.json({ error: "Tanggal/jam invalid" }, { status: 400 });
 
-  // Cek tabrakan
+  console.log(`[SCHEDULE POST] Creating reservation for ${date} ${time} -> ${scheduledAt}`);
+
+  // Cek tabrakan - hanya reservasi yang CONFIRMED atau PENDING
   const conflict = await prisma.reservation.findFirst({
-    where: { doctor, scheduledAt, status: { not: "CANCELLED" as any } },
+    where: {
+      doctor,
+      scheduledAt,
+      status: { in: ["CONFIRMED", "PENDING"] },
+    },
     select: { id: true },
   });
-  if (conflict) return NextResponse.json({ error: "Slot sudah terisi" }, { status: 409 });
+  if (conflict) {
+    console.log(`[SCHEDULE POST] Conflict found for ${scheduledAt}`);
+    return NextResponse.json({ error: "Slot sudah terisi" }, { status: 409 });
+  }
 
   const created = await prisma.reservation.create({
     data: { userId, doctor, note, scheduledAt, status: "PENDING" as any },

@@ -57,6 +57,7 @@ export default function SchedulePage() {
       doctor: string | null;
     }>
   >([]);
+  const [monthBookings, setMonthBookings] = useState<Record<string, number>>({});
 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -76,6 +77,50 @@ export default function SchedulePage() {
     d.setMonth(d.getMonth() + 1);
     setViewMonth(d);
   }
+
+  // Refresh month bookings (untuk update dots di kalender)
+  async function refreshMonthBookings() {
+    try {
+      const year = viewMonth.getFullYear();
+      const month = viewMonth.getMonth();
+      const lastDay = new Date(year, month + 1, 0);
+
+      const promises = [];
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const date = new Date(year, month, day);
+        const dateStr = fmtDateISO(date);
+        promises.push(
+          fetch(`/api/schedule/slots?date=${encodeURIComponent(dateStr)}`, { cache: "no-store" })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+              if (data?.slots) {
+                const bookedCount = data.slots.filter((s: any) => !s.available).length;
+                return { date: dateStr, count: bookedCount };
+              }
+              return { date: dateStr, count: 0 };
+            })
+            .catch(() => ({ date: dateStr, count: 0 })),
+        );
+      }
+
+      const results = await Promise.all(promises);
+      const bookingsMap: Record<string, number> = {};
+      results.forEach((r) => {
+        if (r.count > 0) {
+          bookingsMap[r.date] = r.count;
+        }
+      });
+      setMonthBookings(bookingsMap);
+    } catch {
+      setMonthBookings({});
+    }
+  }
+
+  // Load bookings untuk bulan yang ditampilkan
+  useEffect(() => {
+    void refreshMonthBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMonth]);
 
   // Load ketersediaan slot ketika tanggal dipilih
   useEffect(() => {
@@ -131,11 +176,13 @@ export default function SchedulePage() {
       setMyReservations([]);
     }
   }
+
   useEffect(() => {
     void refreshMyUpcoming();
   }, []); // awal
   useEffect(() => {
     void refreshMyUpcoming();
+    void refreshMonthBookings(); // Refresh dots kalender juga
   }, [msg]); // setelah create/cancel
 
   // Submit appointment
@@ -225,28 +272,52 @@ export default function SchedulePage() {
               const sel = selectedDate && fmtDateISO(d) === fmtDateISO(selectedDate);
               const isToday = fmtDateISO(d) === fmtDateISO(today);
               const isPast = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+              const dateKey = fmtDateISO(d);
+              const bookedCount = monthBookings[dateKey] || 0;
+              const hasBookings = bookedCount > 0;
+
               return (
                 <button
                   key={i}
                   onClick={() => !isPast && setSelectedDate(new Date(d))}
                   disabled={isPast}
                   className={[
-                    "aspect-square rounded-lg text-sm transition-all",
+                    "aspect-square rounded-lg text-sm transition-all relative",
                     inMonth ? (isPast ? "text-gray-300" : "text-gray-900") : "text-gray-400",
                     isPast ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100",
                     sel ? "bg-[#d9e7f7] font-semibold ring-2 ring-[#9fc0dc]" : isToday ? "bg-white font-bold ring-2 ring-teal-500" : isPast ? "bg-gray-50" : "bg-white",
                   ].join(" ")}
                 >
-                  {d.getDate()}
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <span>{d.getDate()}</span>
+                    {hasBookings && !isPast && (
+                      <div className="flex gap-0.5 mt-1">
+                        {Array.from({ length: Math.min(bookedCount, 3) }).map((_, idx) => (
+                          <div key={idx} className={`w-1 h-1 rounded-full ${sel ? "bg-[#9fc0dc]" : isToday ? "bg-teal-500" : "bg-orange-400"}`} />
+                        ))}
+                        {bookedCount > 3 && <span className="text-[8px] text-orange-600 font-bold ml-0.5">+</span>}
+                      </div>
+                    )}
+                  </div>
                 </button>
               );
             })}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-center gap-3 text-xs text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                <span>Slot terisi</span>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Pilih jam */}
         <section className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_0_rgba(0,0,0,0.06)] p-4 md:p-6">
-          <h3 className="mb-4 text-base font-extrabold text-gray-900">Pick a time</h3>
+          <h3 className="mb-4 text-base font-extrabold text-gray-900">Pilih Jam</h3>
           <div className="flex flex-col gap-3">
             {(slots.length ? slots : FALLBACK_SLOTS.map((t) => ({ time: t, available: true }))).map(({ time, available }) => {
               const active = selectedTime === time;
@@ -254,6 +325,7 @@ export default function SchedulePage() {
               const isToday = selectedDate && fmtDateISO(selectedDate) === fmtDateISO(today);
               const currentTime = new Date().toTimeString().substring(0, 5); // HH:MM
               const isPastTime = isToday && time <= currentTime;
+              const isBooked = !available && !isPastTime; // Slot terisi oleh pasien lain
               const isDisabled = !available || !!isPastTime;
 
               return (
@@ -262,20 +334,37 @@ export default function SchedulePage() {
                   onClick={() => !isDisabled && setSelectedTime(time)}
                   disabled={isDisabled}
                   className={[
-                    "w-full rounded-xl px-5 py-3 text-left font-semibold ring-1 transition",
+                    "w-full rounded-xl px-5 py-3 text-left font-semibold ring-1 transition relative",
                     active
                       ? "bg-[#7aa6d8] text-white ring-transparent shadow-[0_6px_0_rgba(0,0,0,0.15)]"
                       : isDisabled
-                        ? "bg-gray-50 text-gray-300 ring-black/5 cursor-not-allowed opacity-50"
-                        : "bg-white text-gray-900 ring-black/10 hover:ring-black/20",
+                        ? "bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed"
+                        : "bg-white text-gray-900 ring-black/10 hover:ring-black/20 hover:bg-gray-50",
                   ].join(" ")}
+                  style={isDisabled ? { opacity: 0.5 } : {}}
                 >
-                  {time}
-                  {!available && <span className="ml-2 text-xs">(penuh)</span>}
-                  {isPastTime && available && <span className="ml-2 text-xs">(sudah lewat)</span>}
+                  <div className="flex items-center justify-between">
+                    <span>{time}</span>
+                    {isBooked && <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">Sudah Terisi</span>}
+                    {isPastTime && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">Sudah Lewat</span>}
+                  </div>
                 </button>
               );
             })}
+          </div>
+
+          {/* Keterangan */}
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <div className="space-y-2 text-xs text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-white border border-black/10"></div>
+                <span>Tersedia untuk booking</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-gray-100 border border-gray-200 opacity-50"></div>
+                <span>Tidak tersedia (terisi/lewat)</span>
+              </div>
+            </div>
           </div>
         </section>
 
