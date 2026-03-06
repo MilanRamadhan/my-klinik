@@ -77,13 +77,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
       >
         <div className="flex items-center justify-center mb-2">
           <div
-            className={`text-sm font-semibold flex items-center justify-center ${
-              isToday
-                ? "bg-teal-500 text-white w-7 h-7 rounded-full"
-                : dayAppointments.length > 0
-                ? "bg-gray-100 text-gray-900 w-7 h-7 rounded-full"
-                : "text-gray-700"
-            }`}
+            className={`text-sm font-semibold flex items-center justify-center ${isToday ? "bg-teal-500 text-white w-7 h-7 rounded-full" : dayAppointments.length > 0 ? "bg-gray-100 text-gray-900 w-7 h-7 rounded-full" : "text-gray-700"}`}
           >
             {day}
           </div>
@@ -96,11 +90,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
               <div
                 key={apt.id}
                 className={`text-xs px-2 py-1.5 rounded-md border ${
-                  apt.status === "PENDING"
-                    ? "bg-yellow-50 border-yellow-200 text-yellow-900"
-                    : apt.status === "CONFIRMED"
-                    ? "bg-green-50 border-green-200 text-green-900"
-                    : "bg-red-50 border-red-200 text-red-900"
+                  apt.status === "PENDING" ? "bg-yellow-50 border-yellow-200 text-yellow-900" : apt.status === "CONFIRMED" ? "bg-green-50 border-green-200 text-green-900" : "bg-red-50 border-red-200 text-red-900"
                 }`}
               >
                 <div className="font-medium truncate">{apt.user.name || "Pasien"}</div>
@@ -112,14 +102,10 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                 </div>
               </div>
             ))}
-            {dayAppointments.length > 3 && (
-              <div className="text-xs text-gray-500 text-center font-medium">
-                +{dayAppointments.length - 3} lagi
-              </div>
-            )}
+            {dayAppointments.length > 3 && <div className="text-xs text-gray-500 text-center font-medium">+{dayAppointments.length - 3} lagi</div>}
           </div>
         )}
-      </div>
+      </div>,
     );
   }
 
@@ -181,10 +167,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
             setSelectedAppointments([]);
           }}
         >
-          <div
-            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
               <div className="flex items-center justify-between">
@@ -211,9 +194,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                   </svg>
                 </button>
               </div>
-              <div className="mt-4 text-sm text-blue-100">
-                Total: {selectedAppointments.length} Pasien
-              </div>
+              <div className="mt-4 text-sm text-blue-100">Total: {selectedAppointments.length} Pasien</div>
             </div>
 
             {/* Modal Content */}
@@ -247,25 +228,16 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                   const config = statusConfig[apt.status as keyof typeof statusConfig] || statusConfig.PENDING;
 
                   return (
-                    <div
-                      key={apt.id}
-                      className={`border-2 ${config.border} ${config.bg} rounded-lg p-4 transition hover:shadow-md`}
-                    >
+                    <div key={apt.id} className={`border-2 ${config.border} ${config.bg} rounded-lg p-4 transition hover:shadow-md`}>
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {(apt.user.name || apt.user.email).charAt(0).toUpperCase()}
-                          </div>
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">{(apt.user.name || apt.user.email).charAt(0).toUpperCase()}</div>
                           <div>
-                            <h4 className="font-bold text-gray-900 text-lg">
-                              {apt.user.name || "Pasien Anonim"}
-                            </h4>
+                            <h4 className="font-bold text-gray-900 text-lg">{apt.user.name || "Pasien Anonim"}</h4>
                             <p className="text-sm text-gray-600">{apt.user.email}</p>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.badge}`}>
-                          {config.label}
-                        </span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.badge}`}>{config.label}</span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -291,9 +263,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                             </svg>
                             <div>
                               <div className="text-xs text-gray-500">Dokter</div>
-                              <div className="font-semibold text-gray-900 capitalize">
-                                {apt.doctor.replace("-", " ")}
-                              </div>
+                              <div className="font-semibold text-gray-900 capitalize">{apt.doctor.replace("-", " ")}</div>
                             </div>
                           </div>
                         )}
@@ -304,9 +274,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                           </svg>
                           <div>
                             <div className="text-xs text-gray-500">ID</div>
-                            <div className="font-mono text-xs text-gray-900">
-                              {apt.id.substring(0, 8)}...
-                            </div>
+                            <div className="font-mono text-xs text-gray-900">{apt.id.substring(0, 8)}...</div>
                           </div>
                         </div>
                       </div>
