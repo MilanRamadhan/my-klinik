@@ -61,10 +61,53 @@ export default function SchedulePage() {
 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   const today = new Date();
   const cells = useMemo(() => monthMatrix(viewMonth), [viewMonth]);
-  const canSubmit = !!(selectedDate && selectedTime);
+
+  // Check apakah user sudah punya reservasi aktif di hari yang dipilih
+  const hasActiveReservationOnSelectedDate = useMemo(() => {
+    if (!selectedDate) return false;
+    const selectedDateStr = fmtDateISO(selectedDate);
+    const hasActive = myReservations.some((r) => {
+      const resDateStr = fmtDateISO(new Date(r.scheduledAt));
+      const isActive = r.status === "PENDING" || r.status === "CONFIRMED";
+      const isSameDate = resDateStr === selectedDateStr;
+
+      // Debug logging
+      if (isSameDate) {
+        console.log(`[hasActiveReservationOnSelectedDate] Found reservation on ${selectedDateStr}:`, {
+          id: r.id,
+          status: r.status,
+          isActive,
+          scheduledAt: r.scheduledAt,
+        });
+      }
+
+      return isSameDate && isActive;
+    });
+
+    console.log(`[hasActiveReservationOnSelectedDate] Selected date: ${selectedDateStr}, Has active: ${hasActive}`);
+    return hasActive;
+  }, [myReservations, selectedDate]);
+
+  const canSubmit = !!(selectedDate && selectedTime && !hasActiveReservationOnSelectedDate);
+
+  // Filter reservasi untuk tampilan: 1 minggu ke belakang atau semua
+  const displayedReservations = useMemo(() => {
+    if (showAllHistory) {
+      return myReservations;
+    }
+    // Tampilkan hanya 1 minggu ke belakang
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    return myReservations.filter((r) => {
+      const resDate = new Date(r.scheduledAt);
+      return resDate >= oneWeekAgo;
+    });
+  }, [myReservations, showAllHistory]);
 
   // Navigasi bulan
   function goPrev() {
@@ -84,13 +127,19 @@ export default function SchedulePage() {
       const year = viewMonth.getFullYear();
       const month = viewMonth.getMonth();
       const lastDay = new Date(year, month + 1, 0);
+      const timestamp = Date.now();
 
       const promises = [];
       for (let day = 1; day <= lastDay.getDate(); day++) {
         const date = new Date(year, month, day);
         const dateStr = fmtDateISO(date);
         promises.push(
-          fetch(`/api/schedule/slots?date=${encodeURIComponent(dateStr)}`, { cache: "no-store" })
+          fetch(`/api/schedule/slots?date=${encodeURIComponent(dateStr)}&t=${timestamp}`, {
+            cache: "no-store",
+            headers: {
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+            },
+          })
             .then((r) => (r.ok ? r.json() : null))
             .then((data) => {
               if (data?.slots) {
@@ -131,7 +180,13 @@ export default function SchedulePage() {
       }
       try {
         const d = fmtDateISO(selectedDate);
-        const r = await fetch(`/api/schedule/slots?date=${encodeURIComponent(d)}`, { cache: "no-store" });
+        const timestamp = Date.now();
+        const r = await fetch(`/api/schedule/slots?date=${encodeURIComponent(d)}&t=${timestamp}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        });
         if (!r.ok) {
           setSlots(FALLBACK_SLOTS.map((t) => ({ time: t, available: true })));
           return;
@@ -162,14 +217,40 @@ export default function SchedulePage() {
   // Ambil janji mendatang milik user
   async function refreshMyUpcoming() {
     try {
-      const r = await fetch("/api/schedule/my", { cache: "no-store" });
+      // Tambahkan timestamp untuk cache busting
+      const timestamp = Date.now();
+      const r = await fetch(`/api/schedule/my?t=${timestamp}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       if (!r.ok) {
         setMyUpcoming(null);
         setMyReservations([]);
         return;
       }
       const rows = await r.json();
-      setMyUpcoming(rows?.[0] ?? null);
+
+      console.log(
+        `[refreshMyUpcoming] Fetched ${rows.length} reservations:`,
+        rows.map((r: any) => ({
+          id: r.id,
+          date: fmtDateISO(new Date(r.scheduledAt)),
+          time: new Date(r.scheduledAt).toTimeString().substring(0, 5),
+          status: r.status,
+        })),
+      );
+
+      // Filter untuk upcoming: hanya PENDING/CONFIRMED yang belum lewat
+      const now = new Date();
+      const activeUpcoming = rows.find((row: any) => {
+        const schedDate = new Date(row.scheduledAt);
+        return (row.status === "PENDING" || row.status === "CONFIRMED") && schedDate >= now;
+      });
+
+      setMyUpcoming(activeUpcoming ?? null);
       setMyReservations(rows || []);
     } catch {
       setMyUpcoming(null);
@@ -180,10 +261,6 @@ export default function SchedulePage() {
   useEffect(() => {
     void refreshMyUpcoming();
   }, []); // awal
-  useEffect(() => {
-    void refreshMyUpcoming();
-    void refreshMonthBookings(); // Refresh dots kalender juga
-  }, [msg]); // setelah create/cancel
 
   // Submit appointment
   async function submit() {
@@ -191,25 +268,41 @@ export default function SchedulePage() {
     setSaving(true);
     setMsg(null);
 
-    const fd = new FormData();
-    fd.append("date", fmtDateISO(selectedDate!));
-    fd.append("time", selectedTime!);
-    fd.append("doctor", "dr-alexander");
-    fd.append("note", "");
+    try {
+      const fd = new FormData();
+      fd.append("date", fmtDateISO(selectedDate!));
+      fd.append("time", selectedTime!);
+      fd.append("doctor", "dr-alexander");
+      fd.append("note", "");
 
-    const res = await fetch("/api/schedule", { method: "POST", body: fd });
-    const data = await res.json().catch(() => ({}));
+      const res = await fetch("/api/schedule", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
 
-    setSaving(false);
-    if (res.status === 401) {
-      router.push(`/auth/login?callbackUrl=${encodeURIComponent("/schedule")}`);
-      return;
+      setSaving(false);
+      if (res.status === 401) {
+        router.push(`/auth/login?callbackUrl=${encodeURIComponent("/schedule")}`);
+        return;
+      }
+      if (!res.ok) {
+        const errorMsg = data?.details ? `${data.error}: ${data.details}` : data?.error || "Gagal membuat reservasi.";
+        setMsg({ type: "err", text: errorMsg });
+        console.error("[SUBMIT] Error response:", data);
+        return;
+      }
+      setMsg({ type: "ok", text: "Reservasi berhasil dibuat." });
+
+      // Langsung refresh data setelah berhasil create
+      await refreshMyUpcoming();
+      await refreshMonthBookings();
+
+      // Clear selection setelah berhasil
+      setSelectedDate(null);
+      setSelectedTime(null);
+    } catch (error: any) {
+      setSaving(false);
+      console.error("[SUBMIT] Network or other error:", error);
+      setMsg({ type: "err", text: "Terjadi kesalahan koneksi. Silakan coba lagi." });
     }
-    if (!res.ok) {
-      setMsg({ type: "err", text: data?.error || "Gagal membuat reservasi." });
-      return;
-    }
-    setMsg({ type: "ok", text: "Reservasi berhasil dibuat." });
   }
 
   // Cancel appointment aku (kalau ada)
@@ -217,8 +310,14 @@ export default function SchedulePage() {
     if (!myUpcoming) return;
     try {
       const r = await fetch(`/api/schedule/${myUpcoming.id}`, { method: "DELETE" });
-      if (r.ok) setMsg({ type: "ok", text: "Reservasi dibatalkan." });
-      else setMsg({ type: "err", text: "Gagal membatalkan." });
+      if (r.ok) {
+        setMsg({ type: "ok", text: "Reservasi dibatalkan." });
+        // Langsung refresh data setelah cancel
+        await refreshMyUpcoming();
+        await refreshMonthBookings();
+      } else {
+        setMsg({ type: "err", text: "Gagal membatalkan." });
+      }
     } catch {
       setMsg({ type: "err", text: "Gagal membatalkan." });
     }
@@ -290,28 +389,10 @@ export default function SchedulePage() {
                 >
                   <div className="flex flex-col items-center justify-center h-full">
                     <span>{d.getDate()}</span>
-                    {hasBookings && !isPast && (
-                      <div className="flex gap-0.5 mt-1">
-                        {Array.from({ length: Math.min(bookedCount, 3) }).map((_, idx) => (
-                          <div key={idx} className={`w-1 h-1 rounded-full ${sel ? "bg-[#9fc0dc]" : isToday ? "bg-teal-500" : "bg-orange-400"}`} />
-                        ))}
-                        {bookedCount > 3 && <span className="text-[8px] text-orange-600 font-bold ml-0.5">+</span>}
-                      </div>
-                    )}
                   </div>
                 </button>
               );
             })}
-          </div>
-
-          {/* Legend */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center justify-center gap-3 text-xs text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
-                <span>Slot terisi</span>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -352,20 +433,6 @@ export default function SchedulePage() {
               );
             })}
           </div>
-
-          {/* Keterangan */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <div className="space-y-2 text-xs text-gray-600">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-white border border-black/10"></div>
-                <span>Tersedia untuk booking</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-gray-100 border border-gray-200 opacity-50"></div>
-                <span>Tidak tersedia (terisi/lewat)</span>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* Detail appointment */}
@@ -378,8 +445,8 @@ export default function SchedulePage() {
             <DetailItem label="Duration" value={`Maks ${DURATION_MIN} min`} />
           </div>
 
-          <button disabled={!canSubmit || saving} onClick={submit} className="mt-6 w-full rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-60">
-            {saving ? "Processing..." : "Make an Appointment"}
+          <button disabled={!canSubmit || saving || hasActiveReservationOnSelectedDate} onClick={submit} className="mt-6 w-full rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-60">
+            {saving ? "Processing..." : hasActiveReservationOnSelectedDate ? "Sudah Ada Reservasi di Tanggal Ini" : "Make an Appointment"}
           </button>
         </section>
       </div>
@@ -408,36 +475,62 @@ export default function SchedulePage() {
       {/* Daftar Reservasi Saya */}
       {myReservations.length > 0 && (
         <div className="mt-6">
-          <h2 className="text-lg font-extrabold text-gray-900 mb-4">Riwayat Reservasi Anda</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-extrabold text-gray-900">Riwayat Reservasi Anda</h2>
+              <p className="text-xs text-gray-500 mt-1">{showAllHistory ? `Menampilkan semua ${myReservations.length} reservasi` : `Menampilkan ${displayedReservations.length} reservasi (1 minggu terakhir)`}</p>
+            </div>
+            {myReservations.length > displayedReservations.length && !showAllHistory && (
+              <button onClick={() => setShowAllHistory(true)} className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Lihat Semua ({myReservations.length})
+              </button>
+            )}
+            {showAllHistory && (
+              <button onClick={() => setShowAllHistory(false)} className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Tampilkan Terbaru
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myReservations.map((reservation) => {
-              const schedDate = new Date(reservation.scheduledAt);
-              const statusColors = {
-                PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
-                CONFIRMED: "bg-green-100 text-green-800 border-green-300",
-                CANCELLED: "bg-red-100 text-red-800 border-red-300",
-              };
-              const statusText = {
-                PENDING: "Menunggu Konfirmasi",
-                CONFIRMED: "Dikonfirmasi",
-                CANCELLED: "Dibatalkan",
-              };
-              return (
-                <div key={reservation.id} className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_0_rgba(0,0,0,0.06)] p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{fmtDateHuman(schedDate)}</p>
-                      <p className="text-xs text-gray-500">{schedDate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</p>
+            {displayedReservations.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                <p>Tidak ada reservasi dalam 1 minggu terakhir</p>
+                {myReservations.length > 0 && (
+                  <button onClick={() => setShowAllHistory(true)} className="mt-2 text-sm text-blue-600 hover:underline">
+                    Lihat semua riwayat ({myReservations.length})
+                  </button>
+                )}
+              </div>
+            ) : (
+              displayedReservations.map((reservation) => {
+                const schedDate = new Date(reservation.scheduledAt);
+                const statusColors = {
+                  PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+                  CONFIRMED: "bg-green-100 text-green-800 border-green-300",
+                  CANCELLED: "bg-red-100 text-red-800 border-red-300",
+                };
+                const statusText = {
+                  PENDING: "Menunggu Konfirmasi",
+                  CONFIRMED: "Dikonfirmasi",
+                  CANCELLED: "Dibatalkan",
+                };
+                return (
+                  <div key={reservation.id} className="rounded-2xl bg-white ring-1 ring-black/5 shadow-[0_6px_0_rgba(0,0,0,0.06)] p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{fmtDateHuman(schedDate)}</p>
+                        <p className="text-xs text-gray-500">{schedDate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</p>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full border font-medium ${statusColors[reservation.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}>
+                        {statusText[reservation.status as keyof typeof statusText] || reservation.status}
+                      </span>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full border font-medium ${statusColors[reservation.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}>
-                      {statusText[reservation.status as keyof typeof statusText] || reservation.status}
-                    </span>
+                    {reservation.doctor && <p className="text-xs text-gray-600">Dokter: {reservation.doctor}</p>}
+                    {reservation.status === "PENDING" && <p className="text-xs text-gray-500 mt-2 italic">Mohon menunggu konfirmasi dari admin</p>}
                   </div>
-                  {reservation.doctor && <p className="text-xs text-gray-600">Dokter: {reservation.doctor}</p>}
-                  {reservation.status === "PENDING" && <p className="text-xs text-gray-500 mt-2 italic">Mohon menunggu konfirmasi dari admin</p>}
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}

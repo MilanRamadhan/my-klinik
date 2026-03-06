@@ -17,11 +17,11 @@ export async function GET(req: Request) {
 
   console.log(`[SLOTS API] Querying range: ${dayStart} to ${dayEnd}`);
 
-  // Hanya ambil reservasi yang sudah CONFIRMED atau PENDING (belum dibatalkan)
+  // Hanya ambil reservasi yang sudah CONFIRMED (hanya yang dikonfirmasi admin yang dihitung terisi)
   const taken = await prisma.reservation.findMany({
     where: {
       doctor,
-      status: { in: ["CONFIRMED", "PENDING"] },
+      status: "CONFIRMED",
       scheduledAt: { gte: dayStart, lte: dayEnd },
     },
     select: { scheduledAt: true, status: true },

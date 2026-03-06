@@ -11,10 +11,10 @@ export async function GET() {
   const userId = session?.user?.id as string | undefined;
   if (!userId) return NextResponse.json([], { status: 200 });
 
-  const now = new Date();
+  // Ambil semua reservasi user termasuk yang CANCELLED untuk riwayat lengkap
   const rows = await prisma.reservation.findMany({
-    where: { userId, status: { not: "CANCELLED" as any }, scheduledAt: { gte: now } },
-    orderBy: { scheduledAt: "asc" },
+    where: { userId },
+    orderBy: { scheduledAt: "desc" }, // Urutkan dari yang terbaru
     select: { id: true, doctor: true, scheduledAt: true, status: true, durationMin: true },
   });
   return NextResponse.json(rows);

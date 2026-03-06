@@ -50,8 +50,10 @@ model Reservation {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([scheduledAt, doctor]) // 1 dokter = 1 slot
+  // Removed unique constraint to allow rebooking after cancellation
+  // Validation handled in API to only check PENDING/CONFIRMED status
   @@index([userId, scheduledAt])
+  @@index([scheduledAt, doctor, status])
 }
 
 model Account {
