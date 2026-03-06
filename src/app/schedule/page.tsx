@@ -61,6 +61,7 @@ export default function SchedulePage() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
+  const today = new Date();
   const cells = useMemo(() => monthMatrix(viewMonth), [viewMonth]);
   const canSubmit = !!(selectedDate && selectedTime);
 
@@ -212,11 +213,17 @@ export default function SchedulePage() {
           <div className="grid grid-cols-7 gap-1">
             {useMemo(() => monthMatrix(viewMonth), [viewMonth]).map(({ d, inMonth }, i) => {
               const sel = selectedDate && fmtDateISO(d) === fmtDateISO(selectedDate);
+              const isToday = fmtDateISO(d) === fmtDateISO(today);
               return (
                 <button
                   key={i}
                   onClick={() => setSelectedDate(new Date(d))}
-                  className={["aspect-square rounded-lg text-sm", inMonth ? "text-gray-900" : "text-gray-400", "hover:bg-gray-100", sel ? "bg-[#d9e7f7] font-semibold ring-1 ring-[#9fc0dc]" : "bg-white"].join(" ")}
+                  className={[
+                    "aspect-square rounded-lg text-sm transition-all",
+                    inMonth ? "text-gray-900" : "text-gray-400",
+                    "hover:bg-gray-100",
+                    sel ? "bg-[#d9e7f7] font-semibold ring-2 ring-[#9fc0dc]" : isToday ? "bg-white font-bold ring-2 ring-teal-500" : "bg-white",
+                  ].join(" ")}
                 >
                   {d.getDate()}
                 </button>
@@ -241,8 +248,8 @@ export default function SchedulePage() {
                     active
                       ? "bg-[#7aa6d8] text-white ring-transparent shadow-[0_6px_0_rgba(0,0,0,0.15)]"
                       : available
-                      ? "bg-white text-gray-900 ring-black/10 hover:ring-black/20"
-                      : "bg-gray-100 text-gray-400 ring-black/10 cursor-not-allowed",
+                        ? "bg-white text-gray-900 ring-black/10 hover:ring-black/20"
+                        : "bg-gray-100 text-gray-400 ring-black/10 cursor-not-allowed",
                   ].join(" ")}
                 >
                   {time}
