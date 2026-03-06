@@ -93,9 +93,19 @@ export default function SchedulePage() {
         }
         const j = await r.json();
         setSlots(j.slots);
+
         // reset time kalau slot terpilih tidak available
         if (selectedTime && j.slots.find((s: any) => s.time === selectedTime && !s.available)) {
           setSelectedTime(null);
+        }
+
+        // reset time jika waktu yang dipilih sudah lewat (untuk hari ini)
+        const isToday = fmtDateISO(selectedDate) === fmtDateISO(today);
+        if (isToday && selectedTime) {
+          const currentTime = new Date().toTimeString().substring(0, 5);
+          if (selectedTime <= currentTime) {
+            setSelectedTime(null);
+          }
         }
       } catch {
         setSlots(FALLBACK_SLOTS.map((t) => ({ time: t, available: true })));
@@ -214,15 +224,17 @@ export default function SchedulePage() {
             {useMemo(() => monthMatrix(viewMonth), [viewMonth]).map(({ d, inMonth }, i) => {
               const sel = selectedDate && fmtDateISO(d) === fmtDateISO(selectedDate);
               const isToday = fmtDateISO(d) === fmtDateISO(today);
+              const isPast = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
               return (
                 <button
                   key={i}
-                  onClick={() => setSelectedDate(new Date(d))}
+                  onClick={() => !isPast && setSelectedDate(new Date(d))}
+                  disabled={isPast}
                   className={[
                     "aspect-square rounded-lg text-sm transition-all",
-                    inMonth ? "text-gray-900" : "text-gray-400",
-                    "hover:bg-gray-100",
-                    sel ? "bg-[#d9e7f7] font-semibold ring-2 ring-[#9fc0dc]" : isToday ? "bg-white font-bold ring-2 ring-teal-500" : "bg-white",
+                    inMonth ? (isPast ? "text-gray-300" : "text-gray-900") : "text-gray-400",
+                    isPast ? "cursor-not-allowed opacity-40" : "hover:bg-gray-100",
+                    sel ? "bg-[#d9e7f7] font-semibold ring-2 ring-[#9fc0dc]" : isToday ? "bg-white font-bold ring-2 ring-teal-500" : isPast ? "bg-gray-50" : "bg-white",
                   ].join(" ")}
                 >
                   {d.getDate()}
@@ -238,22 +250,29 @@ export default function SchedulePage() {
           <div className="flex flex-col gap-3">
             {(slots.length ? slots : FALLBACK_SLOTS.map((t) => ({ time: t, available: true }))).map(({ time, available }) => {
               const active = selectedTime === time;
+              // Check if time has passed (only for today)
+              const isToday = selectedDate && fmtDateISO(selectedDate) === fmtDateISO(today);
+              const currentTime = new Date().toTimeString().substring(0, 5); // HH:MM
+              const isPastTime = isToday && time <= currentTime;
+              const isDisabled = !available || !!isPastTime;
+
               return (
                 <button
                   key={time}
-                  onClick={() => available && setSelectedTime(time)}
-                  disabled={!available}
+                  onClick={() => !isDisabled && setSelectedTime(time)}
+                  disabled={isDisabled}
                   className={[
                     "w-full rounded-xl px-5 py-3 text-left font-semibold ring-1 transition",
                     active
                       ? "bg-[#7aa6d8] text-white ring-transparent shadow-[0_6px_0_rgba(0,0,0,0.15)]"
-                      : available
-                        ? "bg-white text-gray-900 ring-black/10 hover:ring-black/20"
-                        : "bg-gray-100 text-gray-400 ring-black/10 cursor-not-allowed",
+                      : isDisabled
+                        ? "bg-gray-50 text-gray-300 ring-black/5 cursor-not-allowed opacity-50"
+                        : "bg-white text-gray-900 ring-black/10 hover:ring-black/20",
                   ].join(" ")}
                 >
                   {time}
-                  {!available && <span className="ml-2 text-xs">(full)</span>}
+                  {!available && <span className="ml-2 text-xs">(penuh)</span>}
+                  {isPastTime && available && <span className="ml-2 text-xs">(sudah lewat)</span>}
                 </button>
               );
             })}
