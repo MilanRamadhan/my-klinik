@@ -22,13 +22,13 @@ export default function Home() {
 
           <div className="mt-8 flex items-center gap-4">
             <Link
-              href="/service"
+              href="#service"
               className="px-6 py-3 rounded-xl font-semibold text-white shadow-lg
                          bg-gradient-to-b from-[#7fa6c9] to-[#9fc0dc] hover:opacity-95"
             >
               Service
             </Link>
-            <Link href="/contact" className="px-6 py-3 rounded-xl font-semibold text-gray-900 bg-white shadow">
+            <Link href="#about" className="px-6 py-3 rounded-xl font-semibold text-gray-900 bg-white shadow">
               Contact
             </Link>
           </div>
