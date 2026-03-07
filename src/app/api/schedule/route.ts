@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const fd = await req.formData();
     const date = String(fd.get("date") || "");
     const time = String(fd.get("time") || "");
-    const doctor = String(fd.get("doctor") || "dr-alexander");
+    const doctor = String(fd.get("doctor") || "dr-donny-mulizar");
     const note = String(fd.get("note") || "");
 
     console.log(`[SCHEDULE POST] Received request:`, { date, time, doctor, userId });

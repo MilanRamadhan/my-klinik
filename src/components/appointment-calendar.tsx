@@ -263,7 +263,7 @@ export function AppointmentCalendar({ appointments }: { appointments: Appointmen
                             </svg>
                             <div>
                               <div className="text-xs text-gray-500">Dokter</div>
-                              <div className="font-semibold text-gray-900 capitalize">{apt.doctor.replace("-", " ")}</div>
+                              <div className="font-semibold text-gray-900">dr. Donny Mulizar, MKM</div>
                             </div>
                           </div>
                         )}

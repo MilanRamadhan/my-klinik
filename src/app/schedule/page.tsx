@@ -272,7 +272,7 @@ export default function SchedulePage() {
       const fd = new FormData();
       fd.append("date", fmtDateISO(selectedDate!));
       fd.append("time", selectedTime!);
-      fd.append("doctor", "dr-alexander");
+      fd.append("doctor", "dr-donny-mulizar");
       fd.append("note", "");
 
       const res = await fetch("/api/schedule", { method: "POST", body: fd });
@@ -525,7 +525,7 @@ export default function SchedulePage() {
                         {statusText[reservation.status as keyof typeof statusText] || reservation.status}
                       </span>
                     </div>
-                    {reservation.doctor && <p className="text-xs text-gray-600">Dokter: {reservation.doctor}</p>}
+                    {reservation.doctor && <p className="text-xs text-gray-600">Dokter: dr. Donny Mulizar, MKM</p>}
                     {reservation.status === "PENDING" && <p className="text-xs text-gray-500 mt-2 italic">Mohon menunggu konfirmasi dari admin</p>}
                   </div>
                 );

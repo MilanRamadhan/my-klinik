@@ -8,7 +8,7 @@ const SLOT_TIMES = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const d = url.searchParams.get("date"); // YYYY-MM-DD
-  const doctor = url.searchParams.get("doctor") ?? "dr-alexander";
+  const doctor = url.searchParams.get("doctor") ?? "dr-donny-mulizar";
   if (!d) return NextResponse.json({ error: "date wajib" }, { status: 400 });
 
   // Query untuk hari tersebut dalam timezone lokal (GMT+0700)

@@ -34,6 +34,8 @@ export default async function PatientsPage() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. BPJS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Terdaftar</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Janji Temu</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
@@ -42,7 +44,7 @@ export default async function PatientsPage() {
           <tbody className="divide-y divide-gray-200">
             {patients.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                   Belum ada pasien terdaftar
                 </td>
               </tr>
@@ -53,6 +55,10 @@ export default async function PatientsPage() {
                     <p className="font-medium text-gray-900">{patient.name || "Tanpa Nama"}</p>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{patient.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{patient.phone || "-"}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {patient.bpjsNumber ? <span className="font-mono bg-green-50 text-green-700 px-2 py-1 rounded text-xs">{patient.bpjsNumber}</span> : <span className="text-gray-400 text-xs">Tidak ada</span>}
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(patient.createdAt).toLocaleDateString("id-ID", {
                       day: "numeric",

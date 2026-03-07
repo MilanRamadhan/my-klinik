@@ -8,9 +8,9 @@ export default function Footer() {
       <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
+        <div className="flex flex-col md:flex-row justify-center items-start gap-40 md:gap-50">
           {/* Brand + deskripsi singkat */}
-          <div>
+          <div className="max-w-xs">
             <div className="text-2xl font-extrabold tracking-tight">
               <span className="text-[#7aa6d8]">Klinik</span> Sehat
             </div>
@@ -32,30 +32,8 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Navigasi cepat */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-900">Menu</h4>
-            <ul className="mt-4 space-y-2 text-sm text-gray-600">
-              <li>
-                <FooterLink href="/">Home</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/service">Service</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/doctors">Doctors</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/about">About</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/contact">Contact</FooterLink>
-              </li>
-            </ul>
-          </div>
-
           {/* Kontak */}
-          <div>
+          <div className="max-w-xs">
             <h4 className="text-sm font-semibold text-gray-900">Kontak</h4>
             <ul className="mt-4 space-y-3 text-sm text-gray-700">
               <li className="flex items-start gap-2">
@@ -80,7 +58,7 @@ export default function Footer() {
           </div>
 
           {/* Jadwal / CTA */}
-          <div>
+          <div className="max-w-xs">
             <h4 className="text-sm font-semibold text-gray-900">Jam Operasional</h4>
             <ul className="mt-4 space-y-2 text-sm text-gray-700">
               <li>Senin–Jumat: 16.00–21.00</li>

@@ -9,7 +9,7 @@ export default async function AppointmentsPage() {
     orderBy: { scheduledAt: "desc" },
     include: {
       user: {
-        select: { id: true, name: true, email: true },
+        select: { id: true, name: true, email: true, phone: true, bpjsNumber: true },
       },
     },
     take: 50,
@@ -61,6 +61,8 @@ export default async function AppointmentsPage() {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pasien</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. BPJS</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jadwal</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dokter</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -70,7 +72,7 @@ export default async function AppointmentsPage() {
           <tbody className="divide-y divide-gray-200">
             {appointments.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                   Belum ada janji temu
                 </td>
               </tr>
@@ -82,6 +84,10 @@ export default async function AppointmentsPage() {
                       <p className="font-medium text-gray-900">{apt.user.name || "Tanpa Nama"}</p>
                       <p className="text-sm text-gray-500">{apt.user.email}</p>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{apt.user.phone || <span className="text-gray-400">-</span>}</td>
+                  <td className="px-6 py-4">
+                    {apt.user.bpjsNumber ? <span className="font-mono bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-medium">{apt.user.bpjsNumber}</span> : <span className="text-gray-400 text-xs">-</span>}
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm text-gray-900">
@@ -98,7 +104,7 @@ export default async function AppointmentsPage() {
                       })}
                     </p>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{apt.doctor || "-"}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.doctor ? "dr. Donny Mulizar, MKM" : "-"}</td>
                   <td className="px-6 py-4">
                     <StatusBadge status={apt.status} />
                   </td>

@@ -45,7 +45,8 @@ export default function DoctorSection() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="text-center pt-10 pb-10 text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Dokter</h2>
+        <h2 className="text-center pt-10 pb-5 text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Dokter Kami</h2>
+        <p className="text-center text-lg text-gray-600 font-semibold mb-10">dr. Donny Mulizar, MKM</p>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
           {/* Left column */}
