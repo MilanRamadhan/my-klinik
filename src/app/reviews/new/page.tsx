@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ReviewForm from "@/components/review-form";
 import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { useAuth } from "@/components/auth-provider";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
-export default function NewReviewPage() {
+function NewReviewContent() {
   // Proteksi halaman - redirect ke login jika belum login
   useProtectedPage();
 
@@ -45,15 +45,7 @@ export default function NewReviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl p-6 md:p-10">
-      {/* NAVIGASI BALIK */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Tulis Ulasan</h1>
-        <Link href="/#service" className="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-black/10 hover:ring-black/20">
-          Kembali
-        </Link>
-      </div>
-
+    <>
       <p className="mt-2 text-gray-600">Pengalamanmu bantu pasien lain mengambil keputusan. Tulis singkat, jelas, dan jujur.</p>
 
       {isSubmitted && <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">Terima kasih! Ulasanmu sudah diterima.</div>}
@@ -80,6 +72,23 @@ export default function NewReviewPage() {
           </div>
         </aside>
       </div>
+    </>
+  );
+}
+
+export default function NewReviewPage() {
+  return (
+    <div className="mx-auto max-w-5xl p-6 md:p-10">
+      {/* NAVIGASI BALIK */}
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 drop-shadow-[0_1px_0_rgba(0,0,0,0.12)]">Tulis Ulasan</h1>
+        <Link href="/#service" className="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-black/10 hover:ring-black/20">
+          Kembali
+        </Link>
+      </div>
+      <Suspense fallback={<div>Memuat...</div>}>
+        <NewReviewContent />
+      </Suspense>
     </div>
   );
 }
