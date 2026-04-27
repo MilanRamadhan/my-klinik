@@ -1,4 +1,4 @@
-// src/middleware.ts
+// src/proxy.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -8,7 +8,7 @@ const protectedRoutes = ["/appointment", "/schedule", "/chat", "/chat", "/review
 // Halaman auth yang tidak boleh diakses jika sudah login
 const authRoutes = ["/auth/login", "/auth/register"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Cek apakah user sudah login (cek dari cookie atau header)

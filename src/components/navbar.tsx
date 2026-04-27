@@ -50,7 +50,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur">
       <div className="flex items-center justify-between px-5 pr-20 py-2">
         <Link href="/#home" className="relative flex items-start gap-2">
-          <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority />
+          <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority style={{ width: "auto", height: "auto" }} />
         </Link>
 
         <button className="p-2 md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" aria-expanded={open}>

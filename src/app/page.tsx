@@ -36,7 +36,7 @@ export default function Home() {
 
         {/* Gambar kanan */}
         <div className="relative h-[360px] md:h-[650px]">
-          <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain" priority sizes="(max-width: 768px) 100vw, 50vw" />
+          <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain" priority loading="eager" sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
       </section>
 
