@@ -20,7 +20,7 @@ export default function Footer() {
               <Social href="https://wa.me/6285262427888" label="WhatsApp">
                 <MessageCircle className="h-5 w-5" />
               </Social>
-              <Social href="mailto:klinik@gmail.com" label="Email">
+              <Social href="mailto:klinikdr.donnymulizar@gmail.com" label="Email">
                 <Mail className="h-5 w-5" />
               </Social>
               <Social href="https://instagram.com" label="Instagram">
@@ -44,8 +44,8 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="mt-0.5 h-4 w-4 text-[#7aa6d8]" />
-                <a href="mailto:klinik@gmail.com" className="hover:underline">
-                  klinik@gmail.com
+                <a href="mailto:klinikdr.donnymulizar@gmail.com" className="hover:underline">
+                  klinikdr.donnymulizar@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-2">

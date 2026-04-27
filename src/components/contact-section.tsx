@@ -27,8 +27,8 @@ const CONTACTS: ContactInfo[] = [
   {
     title: "Contact Us",
     desc: "Butuh informasi cepat? Kirim email.",
-    href: "mailto:klinik@gmail.com",
-    display: "klinik@gmail.com",
+    href: "mailto:klinikdr.donnymulizar@gmail.com",
+    display: "klinikdr.donnymulizar@gmail.com",
     icon: <Mail className="h-8 w-8 text-[#7aa6d8]" />,
   },
 ];
