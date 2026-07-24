@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "../components/session-provider";
 import AppShell from "@/components/app-shell";
+import ChatbotWidget from "@/components/chatbot-widget";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <AppShell>{children}</AppShell>
         </SessionProvider>
+        <ChatbotWidget />
       </body>
     </html>
   );
