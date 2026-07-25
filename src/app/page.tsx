@@ -10,10 +10,10 @@ import Testimonials from "@/components/testimonials";
 export default function Home() {
   return (
     <main className="w-full min-h-screen pb-10 flex flex-col items-center justify-center bg-white">
-      <section id="home" className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center px-4 md:px-10 lg:pl-30 pb-10 pt-10 gap-8 md:gap-0">
+      <section id="home" className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center px-4 md:px-10 lg:pl-30 pb-27 pt-10 gap-8 md:gap-0">
         {/* Copy kiri */}
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[3px_3px_1px_rgba(0,0,0,0.15)]">
+          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[3px_3px_1px_rgba(0,0,0,0.15)]">
             Layanan <span className="text-[#7aa6d8]">Kesehatan</span> Terpercaya
             <br /> untuk Keluarga Anda
           </h1>
@@ -41,36 +41,36 @@ export default function Home() {
       </section>
 
       {/* SECTION PELAYANAN: hanya grid card, tidak ada card pembungkus section */}
-      <section id="service" className="pt-10">
-        <div className="mx-auto max-w-7xl px-4 py-12 pb-0">
+      <section id="service" className="w-full pt-0">
+        <div className="mx-auto max-w-7xl px-4">
           <h2 className="text-center text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Pelayanan Klinik</h2>
           <Services /> {/* grid 4 card link: Call, Schedule, Consultation, Write Review */}
         </div>
       </section>
 
       {/* Banner BPJS tipis, bukan card besar halaman */}
-      <section>
+      <section className="w-full">
         <div className="mx-auto max-w-7xl px-4 ">
           <BpjsBanner />
         </div>
       </section>
 
       {/* Testimonials: grid card kecil-kecil */}
-      <section>
+      <section className="w-full">
         <div className="mx-auto max-w-7xl px-4 py-12 pt-0">
           <Testimonials />
         </div>
       </section>
 
       {/* SECTION DOKTER: grid 3 kolom dengan gambar dokter di tengah */}
-      <section id="doctors" className="">
+      <section id="doctors" className="w-full">
         <div className="mx-auto max-w-7xl px-4">
           <DoctorSection />
         </div>
       </section>
 
       {/* Contact */}
-      <section id="about" className="">
+      <section id="about" className="w-full">
         <div className="mx-auto max-w-7xl px-4">
           <ContactSection />
         </div>

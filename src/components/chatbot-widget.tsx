@@ -62,10 +62,10 @@ export default function ChatbotWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex flex-col items-end">
       {isOpen && (
-        // UI Diperlebar (w-96) dan ditinggikan sedikit (h-[32rem]) agar lebih lega membaca diagnosis
-        <div className="w-96 h-[32rem] bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col mb-4 overflow-hidden font-sans">
+        // UI Diperlebar untuk desktop dan disesuaikan lebarnya untuk mobile
+        <div className="w-[calc(100vw-2rem)] sm:w-96 h-[75vh] max-h-[32rem] bg-white rounded-xl shadow-2xl border border-gray-200 flex flex-col mb-3 md:mb-4 overflow-hidden font-sans">
           {/* Header */}
           <div className="bg-blue-600 text-white p-4 font-semibold flex justify-between items-center shadow-sm z-10">
             <div className="flex items-center gap-2">

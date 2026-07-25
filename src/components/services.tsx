@@ -33,7 +33,7 @@ export default function Services() {
   };
 
   return (
-    <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+    <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-4">
       {items.map((it) => (
         <Link
           key={it.title}
@@ -42,23 +42,23 @@ export default function Services() {
           target={it.href.startsWith("http") ? "_blank" : undefined}
           rel={it.href.startsWith("http") ? "noopener noreferrer" : undefined}
           aria-label={it.title}
-          className="flex items-center group block w-full mx-auto max-w-[280px] sm:max-w-[250px] h-[240px] md:h-[260px] rounded-2xl bg-white p-6 ring-1 ring-black/5
+          className="flex items-center group block w-full mx-auto max-w-[280px] sm:max-w-[250px] h-[140px] sm:h-[240px] md:h-[260px] rounded-2xl bg-white p-3 sm:p-6 ring-1 ring-black/5
                      shadow-[3px_5px_5px_rgba(0,0,0,0.15)] transition
                      hover:shadow-[0_16px_28px_rgba(0,0,0,0.08)]
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7aa6d8]"
         >
           {/* wrapper vertikal biar stabil tingginya */}
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center w-full">
             {/* IKON: naik sedikit saat hover/focus */}
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50
-                            text-3xl transition-transform "
+              className="flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-gray-50
+                            text-xl sm:text-3xl transition-transform"
             >
               {it.icon}
             </div>
 
             {/* JUDUL: tetap di bawah deskripsi */}
-            <p className="mt-4 text-lg font-semibold text-gray-800">{it.title}</p>
+            <p className="mt-3 sm:mt-4 text-xs sm:text-lg font-semibold text-gray-800">{it.title}</p>
 
             {/* DESKRIPSI: muncul DI BAWAH ikon, di dalam card */}
             {/* pakai max-h + opacity agar halus dan tidak menggeser layout liar */}
