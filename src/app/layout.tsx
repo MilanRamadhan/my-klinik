@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body className={`${jakarta.variable} bg-white`}>
+    <html lang="id" className="overflow-x-hidden">
+      <body className={`${jakarta.variable} bg-white overflow-x-hidden w-full max-w-[100vw]`}>
         <SessionProvider>
           <AppShell>{children}</AppShell>
         </SessionProvider>

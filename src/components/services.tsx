@@ -42,9 +42,9 @@ export default function Services() {
           target={it.href.startsWith("http") ? "_blank" : undefined}
           rel={it.href.startsWith("http") ? "noopener noreferrer" : undefined}
           aria-label={it.title}
-          className="flex items-center group block w-full max-w-[250px] h-[260px] rounded-2xl bg-white p-6 ring-1 ring-black/5
+          className="flex items-center group block w-full mx-auto max-w-[280px] sm:max-w-[250px] h-[240px] md:h-[260px] rounded-2xl bg-white p-6 ring-1 ring-black/5
                      shadow-[3px_5px_5px_rgba(0,0,0,0.15)] transition
-                     hover:shadow-[3px_5px_5px_rgba(0,0,0,0.15)]1   
+                     hover:shadow-[0_16px_28px_rgba(0,0,0,0.08)]
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7aa6d8]"
         >
           {/* wrapper vertikal biar stabil tingginya */}

@@ -7,10 +7,10 @@ export default function Footer() {
       {/* garis gradasi tipis biar berkelas */}
       <div className="pointer-events-none absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
 
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="flex flex-col md:flex-row justify-center items-start gap-40 md:gap-50">
+      <div className="mx-auto max-w-7xl px-4 py-10 md:py-12">
+        <div className="flex flex-col md:flex-row justify-center items-start gap-10 lg:gap-32">
           {/* Brand + deskripsi singkat */}
-          <div className="max-w-xs">
+          <div className="w-full md:max-w-xs">
             <div className="text-2xl font-extrabold tracking-tight">
               <span className="text-[#7aa6d8]">Klinik</span> Sehat
             </div>

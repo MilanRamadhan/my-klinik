@@ -10,7 +10,7 @@ import Testimonials from "@/components/testimonials";
 export default function Home() {
   return (
     <main className="w-full min-h-screen pb-10 flex flex-col items-center justify-center bg-white">
-      <section id="home" className=" grid grid-cols-1 md:grid-cols-2 items-center pl-30 pb-15 pt-10">
+      <section id="home" className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center px-4 md:px-10 lg:pl-30 pb-10 pt-10 gap-8 md:gap-0">
         {/* Copy kiri */}
         <div>
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[3px_3px_1px_rgba(0,0,0,0.15)]">
@@ -35,8 +35,8 @@ export default function Home() {
         </div>
 
         {/* Gambar kanan */}
-        <div className="relative h-[360px] md:h-[650px]">
-          <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain" priority loading="eager" sizes="(max-width: 768px) 100vw, 50vw" />
+        <div className="relative h-[280px] w-full mx-auto md:h-[650px] order-first md:order-none z-10 mt-6 md:mt-0">
+          <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain scale-[1.25] md:scale-100 origin-bottom" priority loading="eager" sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
       </section>
 

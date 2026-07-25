@@ -46,11 +46,31 @@ export default function Navbar() {
     return () => io.disconnect();
   }, [pathname]);
 
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur">
-      <div className="flex items-center justify-between px-5 pr-20 py-2">
+    <>
+      <header className={`sticky top-0 z-50 border-b bg-white/70 backdrop-blur transition-transform duration-150 ease-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+      <div className="flex items-center justify-between px-4 py-1 md:py-2 md:px-5 md:pr-20">
         <Link href="/#home" className="relative flex items-start gap-2">
-          <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority style={{ width: "auto", height: "auto" }} />
+          <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority className="h-[40px] w-auto md:h-auto" />
         </Link>
 
         <button className="p-2 md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" aria-expanded={open}>
@@ -104,48 +124,61 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Mobile nav */}
-      {open && (
-        <div className="bg-white md:hidden">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3">
-            {nav.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-sm font-semibold text-gray-800">
-                {item.label}
-              </Link>
-            ))}
-
-            {status === "unauthenticated" && (
-              <Link href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} onClick={() => setOpen(false)} className="w-max rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold">
-                Sign in / Sign up
-              </Link>
-            )}
-
-            {status === "authenticated" && session?.user && (
-              <div className="flex items-center gap-3">
-                <Link href="/profile" onClick={() => setOpen(false)} className="flex items-center gap-2" aria-label="Buka profil">
-                  <Image
-                    src={avatarSrc(session.user.name, session.user.email, session.user.image as string | null)}
-                    alt={session.user.name || session.user.email || "User"}
-                    width={36}
-                    height={36}
-                    className="h-9 w-9 rounded-full object-cover ring-1 ring-black/10"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Profile</span>
-                </Link>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    void signOut({ callbackUrl: "/" });
-                  }}
-                  className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </header>
+
+      {/* Mobile nav Drawer */}
+      <div 
+        className={`fixed inset-0 z-[60] bg-black/40 transition-opacity duration-300 md:hidden ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+      <div 
+        className={`fixed top-0 right-0 bottom-0 z-[70] w-64 bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden flex flex-col ${open ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+          <span className="font-extrabold text-gray-900">Menu</span>
+          <button className="p-2 text-gray-500 hover:text-black transition" onClick={() => setOpen(false)} aria-label="Close menu">
+            ✕
+          </button>
+        </div>
+        <div className="flex flex-col gap-5 px-5 py-6 overflow-y-auto">
+          {nav.map((item) => (
+            <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-base font-semibold text-gray-800 hover:text-[#7aa6d8] transition">
+              {item.label}
+            </Link>
+          ))}
+
+          {status === "unauthenticated" && (
+            <Link href={`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} onClick={() => setOpen(false)} className="mt-2 w-max rounded-full bg-gradient-to-b from-[#cfe0f5] to-[#a7c3e6] px-5 py-2.5 text-sm font-semibold shadow">
+              Sign in / Sign up
+            </Link>
+          )}
+
+          {status === "authenticated" && session?.user && (
+            <div className="mt-2 flex flex-col gap-4 border-t pt-4">
+              <Link href="/profile" onClick={() => setOpen(false)} className="flex items-center gap-3" aria-label="Buka profil">
+                <Image
+                  src={avatarSrc(session.user.name, session.user.email, session.user.image as string | null)}
+                  alt={session.user.name || session.user.email || "User"}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-full object-cover ring-1 ring-black/10"
+                />
+                <span className="text-sm font-semibold text-gray-800">My Profile</span>
+              </Link>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  void signOut({ callbackUrl: "/" });
+                }}
+                className="w-max rounded-full bg-gray-100 px-5 py-2 text-sm font-semibold hover:bg-gray-200 transition"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

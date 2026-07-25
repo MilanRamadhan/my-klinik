@@ -45,7 +45,7 @@ export default function DoctorSection() {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="text-center pt-10 pb-5 text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Dokter Kami</h2>
+        <h2 className="text-center pt-8 pb-3 md:pt-10 md:pb-5 text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-[0_3px_0_rgba(0,0,0,0.15)]">Dokter Kami</h2>
         <p className="text-center text-lg text-gray-600 font-semibold mb-10">dr. Donny Mulizar, MKM</p>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
@@ -57,8 +57,8 @@ export default function DoctorSection() {
           </div>
 
           {/* Center doctor image */}
-          <div className="relative mx-auto h-[360px] w-full max-w-[420px] lg:h-[520px]">
-            <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain scale-150" sizes="(max-width:1024px) 80vw, 33vw" priority={false} />
+          <div className="relative mx-auto h-[320px] w-[90%] max-w-[360px] lg:h-[520px] lg:max-w-[420px] order-first lg:order-none">
+            <Image src="/image/dokter.png" alt="Dokter" fill className="object-contain scale-125 lg:scale-150" sizes="(max-width:1024px) 80vw, 33vw" priority={false} />
           </div>
 
           {/* Right column */}
