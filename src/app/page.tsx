@@ -10,7 +10,7 @@ import Testimonials from "@/components/testimonials";
 export default function Home() {
   return (
     <main className="w-full min-h-screen pb-10 flex flex-col items-center justify-center bg-white">
-      <section id="home" className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center px-4 md:px-10 lg:pl-30 pb-27 pt-10 gap-8 md:gap-0">
+      <section id="home" className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center px-4 md:px-10 lg:pl-30 pb-27 pt-30 gap-8 md:gap-0">
         {/* Copy kiri */}
         <div>
           <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900 drop-shadow-[3px_3px_1px_rgba(0,0,0,0.15)]">
