@@ -3,20 +3,21 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Phone, Calendar, MessageCircle, Star } from "lucide-react";
 
 type Item = {
   title: string;
-  icon: string; // ganti ke komponen ikon kalau mau
+  icon: React.ElementType;
   href: string;
-  desc: string; // info singkat yang ditampilkan saat hover/focus
+  desc: string;
   requiresAuth?: boolean;
 };
 
 const items: Item[] = [
-  { title: "Call for Appointment", icon: "📞", href: "https://wa.me/6285262427888?text=Halo,%20saya%20ingin%20membuat%20janji%20temu", desc: "Telepon klinik untuk booking cepat tanpa antre." },
-  { title: "Get a Date & Serial", icon: "🗓️", href: "/schedule", desc: "Pilih tanggal kunjungan dan dapatkan nomor antrean.", requiresAuth: true },
-  { title: "Consultation", icon: "💬", href: "/chat", desc: "Konsultasi langsung dengan dokter berpengalaman.", requiresAuth: true },
-  { title: "Write a Review", icon: "✍️", href: "/reviews/new", desc: "Bagikan pengalamanmu agar bantu pasien lain.", requiresAuth: true },
+  { title: "Call for Appointment", icon: Phone, href: "https://wa.me/6285262427888?text=Halo,%20saya%20ingin%20membuat%20janji%20temu", desc: "Telepon klinik untuk booking cepat tanpa antre." },
+  { title: "Get a Date & Serial", icon: Calendar, href: "/schedule", desc: "Pilih tanggal kunjungan dan dapatkan nomor antrean.", requiresAuth: true },
+  { title: "Consultation", icon: MessageCircle, href: "/chat", desc: "Konsultasi langsung dengan dokter berpengalaman.", requiresAuth: true },
+  { title: "Write a Review", icon: Star, href: "/reviews/new", desc: "Bagikan pengalamanmu agar bantu pasien lain.", requiresAuth: true },
 ];
 
 export default function Services() {
@@ -29,11 +30,10 @@ export default function Services() {
       e.preventDefault();
       router.push("/auth/login?callbackUrl=" + encodeURIComponent(item.href));
     }
-    // Untuk WhatsApp link, biarkan default behavior (window.open)
   };
 
   return (
-    <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-4">
+    <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
       {items.map((it) => (
         <Link
           key={it.title}
@@ -42,37 +42,71 @@ export default function Services() {
           target={it.href.startsWith("http") ? "_blank" : undefined}
           rel={it.href.startsWith("http") ? "noopener noreferrer" : undefined}
           aria-label={it.title}
-          className="flex items-center group block w-full mx-auto max-w-[280px] sm:max-w-[250px] h-[140px] sm:h-[240px] md:h-[260px] rounded-2xl bg-white p-3 sm:p-6 ring-1 ring-black/5
-                     shadow-[3px_5px_5px_rgba(0,0,0,0.15)] transition
-                     hover:shadow-[0_16px_28px_rgba(0,0,0,0.08)]
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7aa6d8]"
+          className="relative group w-full mx-auto max-w-[280px] h-[140px] sm:h-[240px] md:h-[260px] rounded-2xl flex flex-col items-center justify-center
+                     shadow-[10px_10px_20px_#e6e6e6,-10px_-10px_20px_#ffffff] transition-all duration-500
+                     hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 overflow-hidden"
         >
-          {/* wrapper vertikal biar stabil tingginya */}
-          <div className="flex flex-col items-center text-center w-full">
-            {/* IKON: naik sedikit saat hover/focus */}
+          {/* Animated Gradient Blob (Hidden by default, shown on hover) */}
+          <div className="absolute top-1/2 left-1/2 w-[120px] h-[120px] sm:w-[180px] sm:h-[180px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700
+                          filter blur-[20px] z-0 animate-blob 
+                          bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400"></div>
+
+          {/* Glassy Background covering the whole card */}
+          <div className="absolute inset-[2px] bg-white/95 backdrop-blur-xl rounded-[14px] z-10 flex flex-col items-center justify-center p-3 sm:p-6 transition-colors duration-300">
+            
+            {/* ICON */}
             <div
-              className="flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-gray-50
-                            text-xl sm:text-3xl transition-transform"
+              className="flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm
+                         transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-100 group-hover:shadow-md"
             >
-              {it.icon}
+              <it.icon className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
 
-            {/* JUDUL: tetap di bawah deskripsi */}
-            <p className="mt-3 sm:mt-4 text-xs sm:text-lg font-semibold text-gray-800">{it.title}</p>
+            {/* TITLE */}
+            <p className="mt-3 sm:mt-4 text-xs sm:text-[15px] leading-tight font-semibold text-gray-800 text-center transition-colors group-hover:text-black">
+              {it.title}
+            </p>
 
-            {/* DESKRIPSI: muncul DI BAWAH ikon, di dalam card */}
-            {/* pakai max-h + opacity agar halus dan tidak menggeser layout liar */}
+            {/* DESCRIPTION */}
             <div
-              className="mt-3 w-full overflow-hidden text-sm text-gray-600
-                         max-h-0 opacity-0 translate-y-1
+              className="mt-2 w-full overflow-hidden text-[10px] sm:text-[13px] leading-relaxed text-gray-500 text-center
+                         max-h-0 opacity-0 translate-y-2
                          transition-all duration-500 ease-in-out
-                         group-hover:max-h-24 group-hover:opacity-100 group-hover:translate-y-0"
+                         group-hover:max-h-24 group-hover:opacity-100 group-hover:translate-y-0 hidden sm:block"
             >
               {it.desc}
             </div>
           </div>
         </Link>
       ))}
+
+      {/* Inline keyframes animation */}
+      <style>
+        {`
+          @keyframes blob {
+            0% {
+              transform: translate(-100%, -100%) scale(1);
+            }
+            25% {
+              transform: translate(0%, -100%) scale(1.1);
+            }
+            50% {
+              transform: translate(0%, 0%) scale(1);
+            }
+            75% {
+              transform: translate(-100%, 0%) scale(0.9);
+            }
+            100% {
+              transform: translate(-100%, -100%) scale(1);
+            }
+          }
+
+          .animate-blob {
+            animation: blob 8s linear infinite;
+          }
+        `}
+      </style>
     </div>
   );
 }

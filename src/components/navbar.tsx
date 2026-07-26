@@ -67,7 +67,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 border-b bg-white/70 backdrop-blur transition-transform duration-150 ease-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+      <header className={`fixed top-0 left-0 w-full z-50 border-b bg-white/80 backdrop-blur-md transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="flex items-center justify-between px-4 py-1 md:py-2 md:px-5 md:pr-20">
         <Link href="/#home" className="relative flex items-start gap-2">
           <Image src="/image/logo.png" alt="Klinik" width={100} height={100} priority className="h-[40px] w-auto md:h-auto" />
